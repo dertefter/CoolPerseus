@@ -71,7 +71,7 @@ class AnimationService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
             executeAction(action)
         }
 
-        if (composeView == null) {
+        if (composeView == null && type != "ai_button") {
             showOverlay(type)
         }
         return START_NOT_STICKY
