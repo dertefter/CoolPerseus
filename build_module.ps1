@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 # Configuration variables
-$moduleZipName = "DeviceSettings_Magisk.zip"
+$moduleZipName = "build\magisk\CoolPerseus_Magisk.zip"
 $tempBuildDir = "magisk_module_tmp"
 $apkBuildType = "release"
 
@@ -49,8 +49,10 @@ New-Item -ItemType Directory -Path $deviceSettingsMagiskDir | Out-Null
 New-Item -ItemType Directory -Path $coolPerseusMagiskDir | Out-Null
 
 # Step 5: Copy files to the temporary directory
-Write-Host "[3/5] Copying module.prop and APKs..."
+Write-Host "[3/5] Copying files..."
 Copy-Item -Path "module.prop" -Destination "$tempBuildDir\"
+Copy-Item -Path "service.sh" -Destination "$tempBuildDir\"
+
 Copy-Item -Path $deviceSettingsApkSource -Destination "$deviceSettingsMagiskDir\DeviceSettings.apk"
 Copy-Item -Path $coolPerseusApkSource -Destination "$coolPerseusMagiskDir\CoolPerseus.apk"
 

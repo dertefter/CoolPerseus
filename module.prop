@@ -1,6 +1,6 @@
-id=perseus-keyhandler-mod
-name=Xiaomi Mix 3 KeyHandler Mod
+id=coolperseus
+name=CoolPerseus (Xiaomi Mi Mix 3)
 version=v1.0
 versionCode=1
-author=YourName
-description=Заменяет стандартный DeviceSettings.apk для изменения логики слайдера.
+author=Dertefter Labs
+description=TODO
