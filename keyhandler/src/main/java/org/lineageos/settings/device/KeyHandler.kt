@@ -26,7 +26,7 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler {
             KEYCODE_AI
         )
 
-        if (isMyScancode) {
+        if (!isMyScancode) {
             return event
         } else {
 
