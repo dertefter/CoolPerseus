@@ -83,11 +83,13 @@ class AnimationService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
     private fun executeAction(action: DeviceAction) {
         when (action) {
             DeviceAction.None -> {}
-            DeviceAction.OpenFrontCamera -> openCamera(frontCamera = true)
-            DeviceAction.OpenCamera -> openCamera(frontCamera = false)
-            DeviceAction.Back -> simulateKey(KeyEvent.KEYCODE_SEARCH)
-            DeviceAction.Minimize -> goHome()
-            is DeviceAction.CustomIntent -> launchCustomIntent(action.action)
+            is DeviceAction.LaunchIntent -> {
+                when (action.action) {
+                    "open_front_camera" -> openCamera(frontCamera = true)
+                    "open_camera" -> openCamera(frontCamera = false)
+                    else -> launchCustomIntent(action.action)
+                }
+            }
         }
     }
 

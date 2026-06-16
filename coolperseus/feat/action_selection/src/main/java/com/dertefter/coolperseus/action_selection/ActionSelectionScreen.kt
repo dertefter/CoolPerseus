@@ -114,11 +114,9 @@ fun ActionPickerDialog(
 ) {
     val actions = listOf(
         DeviceAction.None,
-        DeviceAction.OpenFrontCamera,
-        DeviceAction.OpenCamera,
-        DeviceAction.Minimize,
-        DeviceAction.Back,
-        DeviceAction.CustomIntent("")
+        DeviceAction.LaunchIntent("open_front_camera"),
+        DeviceAction.LaunchIntent("open_camera"),
+        DeviceAction.LaunchIntent("")
     )
 
     var customIntentAction by remember { mutableStateOf("") }
@@ -136,7 +134,7 @@ fun ActionPickerDialog(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { onActionSelected(DeviceAction.CustomIntent(customIntentAction)) }) {
+                TextButton(onClick = { onActionSelected(DeviceAction.LaunchIntent(customIntentAction)) }) {
                     Text("OK")
                 }
             },
@@ -158,7 +156,7 @@ fun ActionPickerDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    if (action is DeviceAction.CustomIntent) {
+                                    if (action is DeviceAction.LaunchIntent && action.action.isEmpty()) {
                                         showingCustomInput = true
                                     } else {
                                         onActionSelected(action)
@@ -178,11 +176,13 @@ fun ActionPickerDialog(
 fun DeviceAction.toFriendlyString(): String {
     return when (this) {
         DeviceAction.None -> "Ничего не делать"
-        DeviceAction.OpenFrontCamera -> "Открыть фронтальную камеру"
-        DeviceAction.OpenCamera -> "Открыть основную камеру"
-        DeviceAction.Minimize -> "Свернуть в фон (Home)"
-        DeviceAction.Back -> "Назад (Back)"
-        is DeviceAction.CustomIntent -> if (action.isEmpty()) "Кастомный Intent" else "Intent: $action"
+        is DeviceAction.LaunchIntent -> {
+            when (action) {
+                "open_front_camera" -> "Открыть фронтальную камеру"
+                "open_camera" -> "Открыть основную камеру"
+                else -> if (action.isEmpty()) "Кастомный Intent" else "Intent: $action"
+            }
+        }
     }
 }
 

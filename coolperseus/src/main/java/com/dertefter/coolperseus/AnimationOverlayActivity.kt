@@ -4,12 +4,9 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
