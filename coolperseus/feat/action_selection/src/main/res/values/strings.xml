@@ -1,7 +1,24 @@
 <resources>
-    <string name="jianghu">Warrior</string>
-    <string name="jixie">Mechanics</string>
-    <string name="keji">Hi-tech</string>
-    <string name="lingdong">Intellect</string>
-    <string name="zippo">Lighter</string>
+    <string name="action_selection_title">Actions</string>
+    <string name="back_button_cd">Back</string>
+    <string name="action_on_slider_down">When opening slider</string>
+    <string name="action_on_slider_up">When closing slider</string>
+    <string name="action_on_ai_button">When AI button pressed</string>
+    <string name="action_none">Do nothing</string>
+    <string name="action_open_front_camera">Open front camera</string>
+    <string name="action_open_camera">Open main camera</string>
+    <string name="action_assist">Voice Assist</string>
+    <string name="action_custom_intent">Custom Intent</string>
+    <string name="action_intent_prefix">Intent: %1$s</string>
+    <string name="action_picker_input_title">Enter Action</string>
+    <string name="action_picker_input_label">android.intent.action…</string>
+    <string name="action_picker_confirm">OK</string>
+    <string name="action_picker_cancel">Cancel</string>
+    <string name="action_picker_title">Select action</string>
+    <string name="action_launch_app">Launch app</string>
+    <string name="action_launch_app_prefix">Launch: %1$s</string>
+    <string name="action_launch_shortcut">App Shortcut</string>
+    <string name="action_launch_shortcut_prefix">Shortcut: %1$s</string>
+    <string name="app_picker_title">Select application</string>
+    <string name="shortcut_picker_title">Select shortcut</string>
 </resources>

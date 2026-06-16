@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_selection_title">Действия</string>
+    <string name="back_button_cd">Назад</string>
+    <string name="action_on_slider_down">При открытии слайдера</string>
+    <string name="action_on_slider_up">При закрытии слайдера</string>
+    <string name="action_on_ai_button">При нажатии на AI-кнопку</string>
+    <string name="action_none">Ничего не делать</string>
+    <string name="action_open_front_camera">Открыть фронтальную камеру</string>
+    <string name="action_open_camera">Открыть основную камеру</string>
+    <string name="action_assist">Голосовой помощник</string>
+    <string name="action_custom_intent">Кастомный Intent</string>
+    <string name="action_intent_prefix">Intent: %1$s</string>
+    <string name="action_picker_input_title">Введите Action</string>
+    <string name="action_picker_input_label">android.intent.action…</string>
+    <string name="action_picker_confirm">OK</string>
+    <string name="action_picker_cancel">Отмена</string>
+    <string name="action_picker_title">Выберите действие</string>
+    <string name="action_launch_app">Запустить приложение</string>
+    <string name="action_launch_app_prefix">Запуск: %1$s</string>
+    <string name="app_picker_title">Выберите приложение</string>
+    <string name="action_launch_shortcut">Ярлык приложения</string>
+    <string name="action_launch_shortcut_prefix">Ярлык: %1$s</string>
+    <string name="shortcut_picker_title">Выберите ярлык</string>
+</resources>

@@ -1,22 +1,18 @@
 package com.dertefter.coolperseus.action_selection
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.data.model.DeviceAction
@@ -61,13 +59,13 @@ fun ActionSelectionScreen(
         topBar = {
             LargeTopAppBar(
                 title = {
-                    Text(text = "Действия")
+                    Text(text = stringResource(R.string.action_selection_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(Event.OnNavigateBack) }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back_button_cd)
                         )
                     }
                 },
@@ -87,17 +85,17 @@ fun ActionSelectionScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TitleValueCard(
                         modifier = Modifier.clickable { showActionPickerFor = "slider_down" },
-                        title = "При открытии слайдера",
+                        title = stringResource(R.string.action_on_slider_down),
                         value = uiState.actionSliderDown.toFriendlyString()
                     )
                     TitleValueCard(
                         modifier = Modifier.clickable { showActionPickerFor = "slider_up" },
-                        title = "При закрытии слайдера",
+                        title = stringResource(R.string.action_on_slider_up),
                         value = uiState.actionSliderUp.toFriendlyString()
                     )
                     TitleValueCard(
                         modifier = Modifier.clickable { showActionPickerFor = "ai_button" },
-                        title = "При нажатии на AI-кнопку",
+                        title = stringResource(R.string.action_on_ai_button),
                         value = uiState.actionAiButton.toFriendlyString()
                     )
                 }
@@ -107,81 +105,33 @@ fun ActionSelectionScreen(
     }
 }
 
+
+
 @Composable
-fun ActionPickerDialog(
-    onDismiss: () -> Unit,
-    onActionSelected: (DeviceAction) -> Unit
-) {
-    val actions = listOf(
-        DeviceAction.None,
-        DeviceAction.LaunchIntent("open_front_camera"),
-        DeviceAction.LaunchIntent("open_camera"),
-        DeviceAction.LaunchIntent("")
-    )
-
-    var customIntentAction by remember { mutableStateOf("") }
-    var showingCustomInput by remember { mutableStateOf(false) }
-
-    if (showingCustomInput) {
-        AlertDialog(
-            onDismissRequest = { showingCustomInput = false },
-            title = { Text("Введите Action") },
-            text = {
-                OutlinedTextField(
-                    value = customIntentAction,
-                    onValueChange = { customIntentAction = it },
-                    label = { Text("android.intent.action...") }
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { onActionSelected(DeviceAction.LaunchIntent(customIntentAction)) }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showingCustomInput = false }) {
-                    Text("Отмена")
-                }
-            }
-        )
-    } else {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text("Выберите действие") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    actions.forEach { action ->
-                        Text(
-                            text = action.toFriendlyString(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    if (action is DeviceAction.LaunchIntent && action.action.isEmpty()) {
-                                        showingCustomInput = true
-                                    } else {
-                                        onActionSelected(action)
-                                    }
-                                }
-                                .padding(8.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-            },
-            confirmButton = {}
-        )
-    }
-}
-
 fun DeviceAction.toFriendlyString(): String {
+    val context = LocalContext.current
     return when (this) {
-        DeviceAction.None -> "Ничего не делать"
+        DeviceAction.None -> stringResource(R.string.action_none)
         is DeviceAction.LaunchIntent -> {
             when (action) {
-                "open_front_camera" -> "Открыть фронтальную камеру"
-                "open_camera" -> "Открыть основную камеру"
-                else -> if (action.isEmpty()) "Кастомный Intent" else "Intent: $action"
+                "open_front_camera" -> stringResource(R.string.action_open_front_camera)
+                "open_camera" -> stringResource(R.string.action_open_camera)
+                Intent.ACTION_VOICE_COMMAND -> stringResource(R.string.action_assist)
+                else -> if (action.isEmpty()) stringResource(R.string.action_custom_intent) else stringResource(R.string.action_intent_prefix, action)
             }
+        }
+
+        is DeviceAction.LaunchApp -> {
+            val pm = context.packageManager
+            val label = remember(packageName) {
+                try {
+                    val appInfo = pm.getApplicationInfo(packageName, 0)
+                    pm.getApplicationLabel(appInfo).toString()
+                } catch (_: Exception) {
+                    packageName
+                }
+            }
+            stringResource(R.string.action_launch_app_prefix, label)
         }
     }
 }
