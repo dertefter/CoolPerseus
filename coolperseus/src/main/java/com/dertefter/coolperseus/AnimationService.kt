@@ -1,6 +1,5 @@
 package com.dertefter.coolperseus
 
-import android.app.Instrumentation
 import android.app.KeyguardManager
 import android.app.Service
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
-import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
@@ -31,7 +29,6 @@ import com.dertefter.coolperseus.design.theme.CoolPerseusTheme
 import com.dertefter.coolperseus.overlay.AnimationOverlayRoute
 import com.dertefter.coolperseus.overlay.AnimationOverlayViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -90,32 +87,22 @@ class AnimationService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
                     else -> launchCustomIntent(action.action)
                 }
             }
+
+            is DeviceAction.LaunchApp -> launchApp(action.packageName)
         }
     }
 
-    private fun simulateKey(keyCode: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                Instrumentation().sendKeyDownUpSync(keyCode)
-            } catch (e: Exception) {
-                Log.e("AnimationService", "Instrumentation failed for keyCode $keyCode", e)
-                try {
-                    Runtime.getRuntime().exec("input keyevent $keyCode")
-                } catch (e2: Exception) {
-                    Log.e("AnimationService", "Shell command failed for keyCode $keyCode", e2)
-                }
+    private fun launchApp(packageName: String) {
+        try {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
             }
+        } catch (e: Exception) {
+            Log.e("AnimationService", "Failed to launch app: $packageName", e)
         }
     }
-
-    private fun goHome() {
-        val intent = Intent(Intent.ACTION_MAIN).apply {
-            addCategory(Intent.CATEGORY_HOME)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        startActivity(intent)
-    }
-
     private fun launchCustomIntent(actionString: String) {
         try {
             val intent = Intent(actionString).apply {
