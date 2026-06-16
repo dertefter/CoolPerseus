@@ -1,5 +1,6 @@
 package com.dertefter.coolperseus.design.components
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
@@ -80,8 +81,8 @@ fun SoundCard(
         label = "borderColor"
     )
 
-    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.primary, true)
-    val textColor = sourceColor.harmonize(MaterialTheme.colorScheme.primaryFixed, true)
+    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.primaryContainer, true)
+    val textColor = sourceColor.harmonize(MaterialTheme.colorScheme.onPrimaryContainer, true)
 
     val shape = RoundedCornerShape(24.dp)
 
@@ -141,6 +142,9 @@ fun SoundCard(
     }
 }
 
+@Preview(showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Preview(showBackground = true)
 @Composable
 fun SoundCardPreview() {
