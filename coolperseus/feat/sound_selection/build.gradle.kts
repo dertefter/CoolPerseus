@@ -28,8 +28,6 @@ dependencies {
     implementation(project(":coolperseus:shared:design"))
     implementation(project(":coolperseus:shared:data"))
 
-    implementation(libs.material.kolor)
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

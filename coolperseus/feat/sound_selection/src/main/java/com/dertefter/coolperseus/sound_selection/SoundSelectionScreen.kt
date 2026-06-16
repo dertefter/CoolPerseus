@@ -9,19 +9,16 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.design.components.SoundCard
-import androidx.compose.ui.tooling.preview.Preview
 import com.dertefter.coolperseus.design.theme.CoolPerseusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,17 +35,9 @@ fun SoundSelectionScreen(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeTopAppBar(
+            MediumTopAppBar(
                 title = {
                     Text(text = "Звук слайдера")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { onEvent(Event.OnNavigateBack) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back"
-                        )
-                    }
                 },
                 scrollBehavior = scrollBehavior
             )

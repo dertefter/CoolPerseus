@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">CoolPerseus</string>
+    <string name="app_name">Slider settings</string>
+    <string name="app_actions">Actions</string>
+    <string name="app_sounds">Sounds</string>
 </resources>

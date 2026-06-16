@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Настройки слайдера</string>
+    <string name="app_actions">Действия</string>
+    <string name="app_sounds">Звуки</string>
+</resources>

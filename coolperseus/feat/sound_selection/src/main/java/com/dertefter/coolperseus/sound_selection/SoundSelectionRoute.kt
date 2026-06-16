@@ -7,19 +7,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SoundSelectionRoute(
-    onNavigateBack: () -> Unit,
     viewModel: SoundSelectionViewModel = hiltViewModel(),
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     SoundSelectionScreen(
         uiState = uiState,
-        onEvent = { event ->
-            if (event is Event.OnNavigateBack) {
-                onNavigateBack()
-            } else {
-                viewModel.onEvent(event)
-            }
-        }
+        onEvent = { event -> viewModel.onEvent(event) }
     )
 }

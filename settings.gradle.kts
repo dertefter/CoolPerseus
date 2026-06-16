@@ -30,9 +30,9 @@ include(":coolperseus")
 
 include(":coolperseus:shared:design")
 include(":coolperseus:shared:data")
+include(":coolperseus:shared:navigation")
 
 include(":coolperseus:feat:overlay")
 include(":coolperseus:feat:sound_selection")
 include(":coolperseus:feat:action_selection")
 include(":coolperseus:feat:widgets")
-
