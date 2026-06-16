@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.design.components.SoundCard
@@ -37,7 +38,7 @@ fun SoundSelectionScreen(
         topBar = {
             MediumTopAppBar(
                 title = {
-                    Text(text = "Звук слайдера")
+                    Text(text = stringResource(R.string.sound_selection_title))
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -75,7 +76,7 @@ fun SoundSelectionScreenPreview() {
         SoundSelectionScreen(
             uiState = SoundSelectionUiState(
                 selectedSound = "keji",
-                sounds = listOf(null, "keji", "jixie", "zippo", "jianghu", "lingdong")
+                sounds = listOf("keji", "jixie", "zippo", "jianghu", "lingdong", null)
             ),
             onEvent = {}
         )
