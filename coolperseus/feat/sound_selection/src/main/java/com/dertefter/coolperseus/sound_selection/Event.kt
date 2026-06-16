@@ -4,6 +4,6 @@ sealed class Event {
 
     object OnNavigateBack : Event()
 
-    data class OnSelectSound(val sound: String) : Event()
+    data class OnSelectSound(val sound: String?) : Event()
 
 }

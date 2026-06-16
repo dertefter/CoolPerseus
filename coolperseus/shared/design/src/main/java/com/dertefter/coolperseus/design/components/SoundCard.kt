@@ -8,11 +8,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +30,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.design.R
+import com.dertefter.coolperseus.design.theme.CoolPerseusTheme
 import com.materialkolor.ktx.harmonize
 
 @Composable
 fun SoundCard(
     modifier: Modifier = Modifier,
-    sound: String,
+    sound: String?,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null
 ){
@@ -44,6 +46,7 @@ fun SoundCard(
         "keji" -> stringResource(R.string.keji)
         "lingdong" -> stringResource(R.string.lingdong)
         "zippo" -> stringResource(R.string.zippo)
+        null -> stringResource(R.string.no_sound)
         else -> sound
     }
 
@@ -77,7 +80,7 @@ fun SoundCard(
         label = "borderColor"
     )
 
-    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.onPrimaryFixed, true)
+    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.primary, true)
     val textColor = sourceColor.harmonize(MaterialTheme.colorScheme.primaryFixed, true)
 
     val shape = RoundedCornerShape(24.dp)
@@ -103,6 +106,15 @@ fun SoundCard(
             )
         }
 
+        if (sound == null){
+           Icon(
+               painter = painterResource(id = R.drawable.ic_volume_off),
+               tint = MaterialTheme.colorScheme.primary,
+               contentDescription = stringResource(R.string.no_sound),
+               modifier = Modifier.size(48.dp).align(Alignment.Center)
+           )
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -126,6 +138,23 @@ fun SoundCard(
 
         )
 
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SoundCardPreview() {
+    CoolPerseusTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SoundCard(
+                modifier = Modifier.size(200.dp, 220.dp),
+                sound = null,
+                selected = false
+            )
+        }
     }
 }
 

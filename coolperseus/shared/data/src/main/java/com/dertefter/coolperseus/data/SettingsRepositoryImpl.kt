@@ -76,9 +76,15 @@ class SettingsRepositoryImpl @Inject constructor(
         awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
-    override suspend fun setSelectedSound(sound: SoundType) {
-        sharedPreferences.edit {
-            putString(PREF_SELECTED_SOUND, serializeSound(sound))
+    override suspend fun setSelectedSound(sound: SoundType?) {
+        if (sound == null) {
+            sharedPreferences.edit {
+                putString(PREF_SELECTED_SOUND, "none")
+            }
+        } else {
+            sharedPreferences.edit {
+                putString(PREF_SELECTED_SOUND, serializeSound(sound))
+            }
         }
     }
 

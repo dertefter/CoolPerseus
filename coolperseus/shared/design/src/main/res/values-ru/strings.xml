@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="jianghu">Воин</string>
+    <string name="jixie">Механика</string>
+    <string name="keji">Hi-tech</string>
+    <string name="lingdong">Интеллект</string>
+    <string name="zippo">Зажигалка</string>
+    <string name="no_sound">Без звука</string>
+</resources>

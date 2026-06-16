@@ -31,47 +31,48 @@ fun AnimationOverlayRoute(
     val isOpen = type == "slider_up"
 
     LaunchedEffect(soundType) {
-        if (soundType == null) return@LaunchedEffect
-
-        val soundRes = if (isOpen) {
-            when (soundType) {
-                is SoundType.Keji -> R.raw.slide_keji_close
-                is SoundType.Zippo -> R.raw.slide_zippo_close
-                is SoundType.Jianghu -> R.raw.slide_jianghu_close
-                is SoundType.Lingdong -> R.raw.slide_lingdong_close
-                is SoundType.Jixie -> R.raw.slide_jiguan_close
-                else -> null
+        if (soundType != null) {
+            val soundRes = if (isOpen) {
+                when (soundType) {
+                    is SoundType.Keji -> R.raw.slide_keji_close
+                    is SoundType.Zippo -> R.raw.slide_zippo_close
+                    is SoundType.Jianghu -> R.raw.slide_jianghu_close
+                    is SoundType.Lingdong -> R.raw.slide_lingdong_close
+                    is SoundType.Jixie -> R.raw.slide_jiguan_close
+                    else -> null
+                }
+            } else {
+                when (soundType) {
+                    is SoundType.Keji -> R.raw.slide_keji_open
+                    is SoundType.Zippo -> R.raw.slide_zippo_open
+                    is SoundType.Jianghu -> R.raw.slide_jianghu_open
+                    is SoundType.Lingdong -> R.raw.slide_lingdong_open
+                    is SoundType.Jixie -> R.raw.slide_jiguan_open
+                    else -> null
+                }
             }
-        } else {
-            when (soundType) {
-                is SoundType.Keji -> R.raw.slide_keji_open
-                is SoundType.Zippo -> R.raw.slide_zippo_open
-                is SoundType.Jianghu -> R.raw.slide_jianghu_open
-                is SoundType.Lingdong -> R.raw.slide_lingdong_open
-                is SoundType.Jixie -> R.raw.slide_jiguan_open
-                else -> null
-            }
-        }
 
-        val mediaPlayer = if (soundRes != null) {
-            MediaPlayer.create(context, soundRes)
-        } else {
-            val currentSoundType = soundType
-            if (currentSoundType is SoundType.Custom) {
-                val path = if (isOpen) currentSoundType.closeSoundPath else currentSoundType.openSoundPath
-                if (path.isNotEmpty()) {
-                    try {
-                        MediaPlayer.create(context, path.toUri())
-                    } catch (_: Exception) {
-                        null
-                    }
+            val mediaPlayer = if (soundRes != null) {
+                MediaPlayer.create(context, soundRes)
+            } else {
+                val currentSoundType = soundType
+                if (currentSoundType is SoundType.Custom) {
+                    val path =
+                        if (isOpen) currentSoundType.closeSoundPath else currentSoundType.openSoundPath
+                    if (path.isNotEmpty()) {
+                        try {
+                            MediaPlayer.create(context, path.toUri())
+                        } catch (_: Exception) {
+                            null
+                        }
+                    } else null
                 } else null
-            } else null
-        }
+            }
 
-        mediaPlayer?.start()
-        mediaPlayer?.setOnCompletionListener {
-            it.release()
+            mediaPlayer?.start()
+            mediaPlayer?.setOnCompletionListener {
+                it.release()
+            }
         }
 
         percent.animateTo(

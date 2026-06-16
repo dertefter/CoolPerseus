@@ -14,7 +14,7 @@ interface SettingsRepository {
     val actionSliderDown: Flow<DeviceAction>
     val actionAiButton: Flow<DeviceAction>
 
-    suspend fun setSelectedSound(sound: SoundType)
+    suspend fun setSelectedSound(sound: SoundType?)
 
     suspend fun addCustom(soundType: SoundType)
 

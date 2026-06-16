@@ -23,7 +23,8 @@ class SoundSelectionViewModel @Inject constructor(
         "jixie",
         "zippo",
         "jianghu",
-        "lingdong"
+        "lingdong",
+        null
     )
 
     val uiState: StateFlow<SoundSelectionUiState> = combine(
@@ -37,14 +38,14 @@ class SoundSelectionViewModel @Inject constructor(
                 is SoundType.Zippo -> "zippo"
                 is SoundType.Jianghu -> "jianghu"
                 is SoundType.Lingdong -> "lingdong"
-                else -> ""
+                else -> null
             },
             sounds = sounds
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SoundSelectionUiState("", emptyList())
+        initialValue = SoundSelectionUiState(null, emptyList())
     )
 
     fun onEvent(event: Event) {
@@ -59,9 +60,7 @@ class SoundSelectionViewModel @Inject constructor(
                         "lingdong" -> SoundType.Lingdong
                         else -> null
                     }
-                    soundType?.let {
-                        settingsRepository.setSelectedSound(it)
-                    }
+                    settingsRepository.setSelectedSound(soundType)
                 }
             }
             Event.OnNavigateBack -> {
