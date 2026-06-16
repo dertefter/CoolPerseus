@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INJECT_EVENTS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.BIND_APPWIDGET"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <queries>
+        <intent>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent>
+    </queries>
+
+    <application
+        android:name="com.dertefter.coolperseus.CoolPerseus"
+        android:icon="@mipmap/ic_launcher"
+        android:label="CoolPerseus"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TransparentOverlay">
+        <activity
+            android:name="com.dertefter.coolperseus.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.CoolPerseus">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.dertefter.coolperseus.AnimationOverlayActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
+        </activity>
+
+        <service
+            android:name="com.dertefter.coolperseus.AnimationService"
+            android:exported="false" />
+
+        <activity
+            android:name="com.dertefter.coolperseus.WidgetsOverlayActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.TransparentOverlay">
+        </activity>
+    </application>
+
+</manifest>
