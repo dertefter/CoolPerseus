@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dertefter.coolperseus.data.model.SoundType
-import com.dertefter.coolperseus.design.EdgesGlow
 
 @Composable
 fun AnimationOverlayRoute(
