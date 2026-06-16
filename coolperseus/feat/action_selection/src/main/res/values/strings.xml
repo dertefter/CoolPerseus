@@ -21,4 +21,5 @@
     <string name="action_launch_shortcut_prefix">Shortcut: %1$s</string>
     <string name="app_picker_title">Select application</string>
     <string name="shortcut_picker_title">Select shortcut</string>
+    <string name="nothing_to_do">Do nothing</string>
 </resources>

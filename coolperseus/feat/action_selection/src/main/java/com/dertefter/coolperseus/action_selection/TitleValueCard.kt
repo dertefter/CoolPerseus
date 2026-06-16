@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -34,7 +35,7 @@ fun TitleValueCard(
 
     Column(
         modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(14.dp)
             .fillMaxWidth()
@@ -44,7 +45,7 @@ fun TitleValueCard(
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = value ?: "Ничего не делать",
+            text = value ?: stringResource(R.string.nothing_to_do),
             style = MaterialTheme.typography.labelLarge,
             color = valueColor
         )
