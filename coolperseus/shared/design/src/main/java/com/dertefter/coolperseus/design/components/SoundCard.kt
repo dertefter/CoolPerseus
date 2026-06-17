@@ -10,7 +10,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,10 +84,10 @@ fun SoundCard(
         label = "borderColor"
     )
 
-    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.primaryContainer, true)
-    val textColor = sourceColor.harmonize(MaterialTheme.colorScheme.onPrimaryContainer, true)
+    val gradColor = sourceColor.harmonize(MaterialTheme.colorScheme.onPrimaryFixed, false)
+    val textColor = sourceColor.harmonize(MaterialTheme.colorScheme.primaryFixed, true)
 
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(22.dp)
 
     Box(
         modifier = modifier
@@ -142,21 +145,36 @@ fun SoundCard(
     }
 }
 
-@Preview(showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:width=673dp,height=841dp"
 )
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = "spec:width=673dp,height=841dp"
+)
 @Composable
-fun SoundCardPreview() {
+fun SoundCardPreviewDark() {
     CoolPerseusTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SoundCard(
-                modifier = Modifier.size(200.dp, 220.dp),
+                modifier = Modifier.height(200.dp).weight(1f),
                 sound = null,
                 selected = false
+            )
+            SoundCard(
+                modifier = Modifier.height(200.dp).weight(1f),
+                sound = "jianghu",
+                selected = false
+            )
+            SoundCard(
+                modifier = Modifier.height(200.dp).weight(1f),
+                sound = "zippo",
+                selected = true
             )
         }
     }

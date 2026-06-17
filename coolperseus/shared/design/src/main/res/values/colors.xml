@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="jianghu">#D71717</color>
-    <color name="jixie">#17b7ff</color>
-    <color name="keji">#8b5bff</color>
-    <color name="lingdong">#5ee6c1</color>
-    <color name="zippo">#fd9314</color>
+    <color name="jianghu">#8a0e0e</color>
+    <color name="jixie">#096F9D</color>
+    <color name="keji">#39119D</color>
+    <color name="lingdong">#0AA077</color>
+    <color name="zippo">#C16D09</color>
 </resources>
