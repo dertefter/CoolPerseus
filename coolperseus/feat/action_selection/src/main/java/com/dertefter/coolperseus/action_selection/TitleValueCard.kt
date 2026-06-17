@@ -35,7 +35,7 @@ fun TitleValueCard(
 
     Column(
         modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(14.dp)
