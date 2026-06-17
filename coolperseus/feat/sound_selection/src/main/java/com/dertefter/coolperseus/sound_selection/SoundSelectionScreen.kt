@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.design.components.SoundCard
 import com.dertefter.coolperseus.design.theme.CoolPerseusTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoundSelectionScreen(
     uiState: SoundSelectionUiState,
@@ -36,7 +38,7 @@ fun SoundSelectionScreen(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            MediumTopAppBar(
+            MediumFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(R.string.sound_selection_title))
                 },
