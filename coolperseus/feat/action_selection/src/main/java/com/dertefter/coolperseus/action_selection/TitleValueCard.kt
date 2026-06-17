@@ -2,11 +2,10 @@ package com.dertefter.coolperseus.action_selection
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,7 +21,8 @@ import androidx.compose.ui.unit.dp
 fun TitleValueCard(
     modifier: Modifier = Modifier,
     title: String,
-    value: String? = null
+    value: String? = null,
+    onClick: () -> Unit = {}
 ){
 
     val valueColor by animateColorAsState(
@@ -36,6 +36,7 @@ fun TitleValueCard(
     Column(
         modifier
             .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(14.dp)
             .fillMaxWidth()
