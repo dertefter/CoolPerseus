@@ -23,6 +23,17 @@ Magisk module for the **Xiaomi Mi Mix 3 (Perseus)** running **LineageOS**.
 
 Download the latest `CoolPerseus_Magisk.zip` from the [Releases](../../releases) section and install it with Magisk App.
 
+### Troubleshooting
+
+If you don't see the "Slider Settings" app after installing the module, try running the following command:
+
+```bash
+adb shell
+su
+APK_PATH="/system/priv-app/CoolPerseus/CoolPerseus.apk"
+pm install -r -g "$APK_PATH"
+```
+
 ### Building from Source
 
 If you want to build the module yourself, you can use the provided PowerShell script.
