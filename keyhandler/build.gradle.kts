@@ -14,7 +14,7 @@ android {
         minSdk = 29
         targetSdk = 37
         versionCode = 41
-        versionName = "v1.0.8 (CoolPerseus)"
+        versionName = "2.0.0 (CoolPerseus)"
     }
 
     buildTypes {
