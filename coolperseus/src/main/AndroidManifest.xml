@@ -3,20 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INJECT_EVENTS"
-        tools:ignore="ProtectedPermissions" />
-    <uses-permission
-        android:name="android.permission.BIND_APPWIDGET"
-        tools:ignore="ProtectedPermissions" />
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
-
-    <queries>
-        <intent>
-            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-        </intent>
-    </queries>
 
     <application
         android:name="com.dertefter.coolperseus.CoolPerseus"
@@ -48,13 +34,6 @@
             android:name="com.dertefter.coolperseus.AnimationService"
             android:exported="false" />
 
-        <activity
-            android:name="com.dertefter.coolperseus.WidgetsOverlayActivity"
-            android:exported="true"
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true"
-            android:theme="@style/Theme.TransparentOverlay">
-        </activity>
     </application>
 
 </manifest>

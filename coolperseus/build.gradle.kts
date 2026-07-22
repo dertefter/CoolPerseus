@@ -15,8 +15,8 @@ android {
         applicationId = "com.dertefter.coolperseus"
         minSdk = 34
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 37
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,10 +47,8 @@ dependencies {
     implementation(project(":coolperseus:feat:overlay"))
     implementation(project(":coolperseus:feat:sound_selection"))
     implementation(project(":coolperseus:feat:action_selection"))
-    implementation(project(":coolperseus:feat:widgets"))
 
     implementation(libs.material.kolor)
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -65,7 +63,6 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
