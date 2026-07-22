@@ -1,8 +1,10 @@
 package com.dertefter.coolperseus.data
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import com.dertefter.coolperseus.data.model.DeviceAction
 import com.dertefter.coolperseus.data.model.SoundType
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,75 +19,33 @@ class SettingsRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : SettingsRepository {
 
-    private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences("coolperseus_settings", Context.MODE_PRIVATE)
+    private val contentResolver = context.contentResolver
 
-
-    override val soundType: Flow<SoundType?> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PREF_SELECTED_SOUND) {
-                trySend(getSelectedSound())
+    private fun <T> createSettingsFlow(key: String, getValue: () -> T): Flow<T> = callbackFlow {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                trySend(getValue())
             }
         }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-        trySend(getSelectedSound())
-        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
+        val uri = Settings.System.getUriFor(key)
+        contentResolver.registerContentObserver(uri, false, observer)
+        trySend(getValue())
+        awaitClose { contentResolver.unregisterContentObserver(observer) }
     }
 
-    override val customSounds: Flow<List<SoundType>> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PREF_CUSTOM_SOUNDS) {
-                trySend(getCustomSoundsList())
-            }
-        }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-        trySend(getCustomSoundsList())
-        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
+    override val soundType: Flow<SoundType?> = createSettingsFlow(PREF_SELECTED_SOUND) { getSelectedSound() }
 
-    override val actionSliderUp: Flow<DeviceAction> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PREF_ACTION_SLIDER_UP) {
-                trySend(getAction(PREF_ACTION_SLIDER_UP))
-            }
-        }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-        trySend(getAction(PREF_ACTION_SLIDER_UP))
-        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
+    override val customSounds: Flow<List<SoundType>> = createSettingsFlow(PREF_CUSTOM_SOUNDS) { getCustomSoundsList() }
 
-    override val actionSliderDown: Flow<DeviceAction> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PREF_ACTION_SLIDER_DOWN) {
-                trySend(getAction(PREF_ACTION_SLIDER_DOWN))
-            }
-        }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-        trySend(getAction(PREF_ACTION_SLIDER_DOWN))
-        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
+    override val actionSliderUp: Flow<DeviceAction> = createSettingsFlow(PREF_ACTION_SLIDER_UP) { getAction(PREF_ACTION_SLIDER_UP) }
 
-    override val actionAiButton: Flow<DeviceAction> = callbackFlow {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == PREF_ACTION_AI_BUTTON) {
-                trySend(getAction(PREF_ACTION_AI_BUTTON))
-            }
-        }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
-        trySend(getAction(PREF_ACTION_AI_BUTTON))
-        awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
+    override val actionSliderDown: Flow<DeviceAction> = createSettingsFlow(PREF_ACTION_SLIDER_DOWN) { getAction(PREF_ACTION_SLIDER_DOWN) }
+
+    override val actionAiButton: Flow<DeviceAction> = createSettingsFlow(PREF_ACTION_AI_BUTTON) { getAction(PREF_ACTION_AI_BUTTON) }
 
     override suspend fun setSelectedSound(sound: SoundType?) {
-        if (sound == null) {
-            sharedPreferences.edit {
-                putString(PREF_SELECTED_SOUND, "none")
-            }
-        } else {
-            sharedPreferences.edit {
-                putString(PREF_SELECTED_SOUND, serializeSound(sound))
-            }
-        }
+        val value = if (sound == null) "none" else serializeSound(sound)
+        Settings.System.putString(contentResolver, PREF_SELECTED_SOUND, value)
     }
 
     override suspend fun addCustom(soundType: SoundType) {
@@ -109,43 +69,36 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setActionSliderUp(action: DeviceAction) {
-        sharedPreferences.edit {
-            putString(PREF_ACTION_SLIDER_UP, action.toStringRepresentation())
-        }
+        Settings.System.putString(contentResolver, PREF_ACTION_SLIDER_UP, action.toStringRepresentation())
     }
 
     override suspend fun setActionSliderDown(action: DeviceAction) {
-        sharedPreferences.edit {
-            putString(PREF_ACTION_SLIDER_DOWN, action.toStringRepresentation())
-        }
+        Settings.System.putString(contentResolver, PREF_ACTION_SLIDER_DOWN, action.toStringRepresentation())
     }
 
     override suspend fun setActionAiButton(action: DeviceAction) {
-        sharedPreferences.edit {
-            putString(PREF_ACTION_AI_BUTTON, action.toStringRepresentation())
-        }
+        Settings.System.putString(contentResolver, PREF_ACTION_AI_BUTTON, action.toStringRepresentation())
     }
 
     private fun getAction(key: String): DeviceAction {
-        val serialized = sharedPreferences.getString(key, null)
+        val serialized = Settings.System.getString(contentResolver, key)
         return DeviceAction.fromString(serialized)
     }
 
     private fun getSelectedSound(): SoundType? {
-        val serialized = sharedPreferences.getString(PREF_SELECTED_SOUND, null) ?: return SoundType.Keji
+        val serialized = Settings.System.getString(contentResolver, PREF_SELECTED_SOUND) ?: return SoundType.Keji
         return deserializeSound(serialized)
     }
 
     private fun getCustomSoundsList(): List<SoundType> {
-        val serializedSet = sharedPreferences.getStringSet(PREF_CUSTOM_SOUNDS, emptySet()) ?: emptySet()
-        return serializedSet.mapNotNull { deserializeSound(it) }
+        val serialized = Settings.System.getString(contentResolver, PREF_CUSTOM_SOUNDS) ?: ""
+        if (serialized.isEmpty()) return emptyList()
+        return serialized.split(";").mapNotNull { deserializeSound(it) }
     }
 
     private fun saveCustomSounds(sounds: List<SoundType>) {
-        val serializedSet = sounds.map { serializeSound(it) }.toSet()
-        sharedPreferences.edit {
-            putStringSet(PREF_CUSTOM_SOUNDS, serializedSet)
-        }
+        val serialized = sounds.joinToString(";") { serializeSound(it) }
+        Settings.System.putString(contentResolver, PREF_CUSTOM_SOUNDS, serialized)
     }
 
     private fun serializeSound(sound: SoundType): String {
@@ -177,12 +130,10 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     companion object {
-        private const val PREF_SELECTED_SOUND = "selected_sound"
-        private const val PREF_CUSTOM_SOUNDS = "custom_sounds"
-        private const val PREF_WIDGET_IDS = "widget_ids"
-
-        private const val PREF_ACTION_SLIDER_UP = "action_slider_up"
-        private const val PREF_ACTION_SLIDER_DOWN = "action_slider_down"
-        private const val PREF_ACTION_AI_BUTTON = "action_ai_button"
+        private const val PREF_SELECTED_SOUND = "coolperseus_selected_sound"
+        private const val PREF_CUSTOM_SOUNDS = "coolperseus_custom_sounds"
+        private const val PREF_ACTION_SLIDER_UP = "coolperseus_action_slider_up"
+        private const val PREF_ACTION_SLIDER_DOWN = "coolperseus_action_slider_down"
+        private const val PREF_ACTION_AI_BUTTON = "coolperseus_action_ai_button"
     }
 }
