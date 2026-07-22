@@ -3,8 +3,16 @@
     android:sharedUserId="android.uid.system"
     package="org.lineageos.settings.device">
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+
     <application
+        android:name=".KeyHandlerApp"
         android:icon="@mipmap/ic_launcher"
-        android:label="DeviceSettings" />
+        android:label="DeviceSettings">
+
+    </application>
 
 </manifest>
