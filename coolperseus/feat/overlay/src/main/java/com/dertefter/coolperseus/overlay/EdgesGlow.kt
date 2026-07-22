@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
@@ -23,7 +24,8 @@ import androidx.compose.ui.unit.dp
 fun EdgesGlow(
     modifier: Modifier = Modifier,
     percent: Float = 1f,
-    closed: Boolean = false
+    closed: Boolean = false,
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
 
     val maxV = if (closed) 12f else 30f
@@ -48,7 +50,7 @@ fun EdgesGlow(
                 shape = RoundedCornerShape(28.dp),
                 shadow = Shadow(
                     radius = animatedWidth,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = color,
                     alpha = alpha,
                     offset = DpOffset(0.dp, vOffset),
                 )
