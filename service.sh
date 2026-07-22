@@ -1,6 +1,8 @@
 #!/system/bin/sh
 
 PKG="com.dertefter.coolperseus"
+KH_PKG="org.lineageos.settings.device"
+
 APK_PATH="/system/priv-app/CoolPerseus/CoolPerseus.apk"
 
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
@@ -16,3 +18,7 @@ fi
 appops set $PKG SYSTEM_ALERT_WINDOW allow
 appops set $PKG RUN_ANY_IN_BACKGROUND allow
 dumpsys deviceidle whitelist +$PKG
+
+appops set $KH_PKG SYSTEM_ALERT_WINDOW allow
+appops set $KH_PKG RUN_ANY_IN_BACKGROUND allow
+dumpsys deviceidle whitelist +$KH_PKG
