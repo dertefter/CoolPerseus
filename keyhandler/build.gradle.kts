@@ -1,19 +1,20 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "org.lineageos.settings.device"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "org.lineageos.settings.device"
         minSdk = 29
         targetSdk = 37
-        versionCode = 38
-        versionName = "modified my CoolPerseus"
+        versionCode = 41
+        versionName = "v1.0.8 (CoolPerseus)"
     }
 
     buildTypes {
@@ -28,9 +29,25 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
+    implementation(project(":coolperseus:shared:design"))
+    implementation(project(":coolperseus:shared:data"))
+    implementation(project(":coolperseus:feat:overlay"))
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }
