@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.dertefter.coolperseus">
+        <permission name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    </privapp-permissions>
+</permissions>

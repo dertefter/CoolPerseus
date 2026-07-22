@@ -13,6 +13,9 @@ $deviceSettingsMagiskDir = "$tempBuildDir\system\priv-app\DeviceSettings"
 $coolPerseusApkSource = "coolperseus\build\outputs\apk\$apkBuildType\coolperseus-$apkBuildType.apk"
 $coolPerseusMagiskDir = "$tempBuildDir\system\priv-app\CoolPerseus"
 
+# Path for the permissions allowlist
+$permissionsMagiskDir = "$tempBuildDir\system\etc\permissions"
+
 Write-Host "=== Magisk Module Build Script ===" -ForegroundColor Cyan
 
 # Step 1: Check for module.prop
@@ -47,11 +50,13 @@ if (Test-Path $tempBuildDir) {
 }
 New-Item -ItemType Directory -Path $deviceSettingsMagiskDir | Out-Null
 New-Item -ItemType Directory -Path $coolPerseusMagiskDir | Out-Null
+New-Item -ItemType Directory -Path $permissionsMagiskDir | Out-Null
 
 # Step 5: Copy files to the temporary directory
 Write-Host "[3/5] Copying files..."
 Copy-Item -Path "module.prop" -Destination "$tempBuildDir\"
 Copy-Item -Path "service.sh" -Destination "$tempBuildDir\"
+Copy-Item -Path "privapp-permissions-coolperseus.xml" -Destination "$permissionsMagiskDir\"
 
 Copy-Item -Path $deviceSettingsApkSource -Destination "$deviceSettingsMagiskDir\DeviceSettings.apk"
 Copy-Item -Path $coolPerseusApkSource -Destination "$coolPerseusMagiskDir\CoolPerseus.apk"
