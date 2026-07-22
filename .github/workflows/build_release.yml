@@ -32,8 +32,10 @@ jobs:
         run: |
           mkdir -p magisk_module_tmp/system/priv-app/DeviceSettings
           mkdir -p magisk_module_tmp/system/priv-app/CoolPerseus
+          mkdir -p magisk_module_tmp/system/etc/permissions
           cp module.prop magisk_module_tmp/
           cp service.sh magisk_module_tmp/
+          cp privapp-permissions-coolperseus.xml magisk_module_tmp/system/etc/permissions/
           cp keyhandler/build/outputs/apk/release/keyhandler-release.apk magisk_module_tmp/system/priv-app/DeviceSettings/DeviceSettings.apk
           cp coolperseus/build/outputs/apk/release/coolperseus-release.apk magisk_module_tmp/system/priv-app/CoolPerseus/CoolPerseus.apk
           cd magisk_module_tmp
