@@ -2,14 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
     <application
         android:name="com.dertefter.coolperseus.CoolPerseus"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TransparentOverlay">
+        android:theme="@style/Theme.CoolPerseus">
         <activity
             android:name="com.dertefter.coolperseus.MainActivity"
             android:exported="true"
@@ -19,20 +21,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.dertefter.coolperseus.AnimationOverlayActivity"
-            android:exported="true"
-            android:launchMode="singleInstance"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true"
-            android:noHistory="true">
-        </activity>
-
-        <service
-            android:name="com.dertefter.coolperseus.AnimationService"
-            android:exported="false" />
 
     </application>
 
