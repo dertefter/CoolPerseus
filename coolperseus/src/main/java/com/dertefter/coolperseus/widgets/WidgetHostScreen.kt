@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -71,7 +70,7 @@ fun WidgetHostScreen(
     val listState = rememberLazyListState()
     var editingWidgetId by remember { mutableStateOf<Int?>(null) }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
@@ -83,7 +82,7 @@ fun WidgetHostScreen(
             }
         },
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = Color.Transparent,
@@ -116,11 +115,11 @@ fun WidgetHostScreen(
         LazyColumn(
             state = listState,
             modifier = Modifier
+                .padding(horizontal = 8.dp)
                 .verticalFadingEdges(
                     length = 100.dp
                 )
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .fillMaxSize(),
             contentPadding = PaddingValues(
                 start = paddingValues.calculateStartPadding(layoutDirection),
                 top = paddingValues.calculateTopPadding(),
