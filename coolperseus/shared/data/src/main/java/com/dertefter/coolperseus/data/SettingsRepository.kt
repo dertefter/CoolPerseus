@@ -14,6 +14,10 @@ interface SettingsRepository {
     val actionSliderDown: Flow<DeviceAction>
     val actionAiButton: Flow<DeviceAction>
 
+    val widgets: Flow<List<Int>>
+
+    val widgetHeights: Flow<Map<Int, Int>>
+
     suspend fun setSelectedSound(sound: SoundType?)
 
     suspend fun addCustom(soundType: SoundType)
@@ -23,6 +27,10 @@ interface SettingsRepository {
     suspend fun setActionSliderUp(action: DeviceAction)
     suspend fun setActionSliderDown(action: DeviceAction)
     suspend fun setActionAiButton(action: DeviceAction)
+
+    suspend fun setWidgets(widgets: List<Int>)
+
+    suspend fun setWidgetHeight(widgetId: Int, height: Int)
 
 
 }

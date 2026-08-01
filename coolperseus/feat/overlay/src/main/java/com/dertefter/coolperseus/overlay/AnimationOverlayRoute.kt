@@ -1,11 +1,20 @@
 package com.dertefter.coolperseus.overlay
 
+import android.appwidget.AppWidgetHost
+import android.appwidget.AppWidgetManager
 import android.media.MediaPlayer
+import android.os.Bundle
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -14,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dertefter.coolperseus.data.model.SoundType
@@ -22,10 +33,13 @@ import com.dertefter.coolperseus.data.model.SoundType
 fun AnimationOverlayRoute(
     type: String,
     onAnimationFinished: () -> Unit,
-    viewModel: AnimationOverlayViewModel = hiltViewModel()
+    viewModel: AnimationOverlayViewModel = hiltViewModel(),
+    appWidgetHost: AppWidgetHost,
+    appWidgetManager: AppWidgetManager
 ) {
     val context = LocalContext.current
     val soundType by viewModel.soundType.collectAsState(initial = null)
+    val widgets by viewModel.widgets.collectAsState(initial = emptyList())
     val percent = remember { Animatable(0f) }
 
     val isOpen = type == "slider_up"
@@ -87,5 +101,46 @@ fun AnimationOverlayRoute(
         contentAlignment = Alignment.Center
     ) {
         EdgesGlow(percent = percent.value, closed = isOpen)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            widgets.forEach { widgetId ->
+                val appWidgetProviderInfo = appWidgetManager.getAppWidgetInfo(widgetId)
+                if (appWidgetProviderInfo != null) {
+                    val minHeight = if (appWidgetProviderInfo.minResizeHeight > 0) appWidgetProviderInfo.minResizeHeight else 100
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(minHeight.dp)
+                            .padding(vertical = 8.dp),
+                        factory = { ctx ->
+                            appWidgetHost.createView(ctx, widgetId, appWidgetProviderInfo)
+                        },
+                        update = { view ->
+                            view.post {
+                                val displayMetrics = view.resources.displayMetrics
+                                val widthDp = (view.width / displayMetrics.density).toInt()
+                                val actualHeightDp = (view.height / displayMetrics.density).toInt()
+
+                                if (widthDp > 0 && actualHeightDp > 0) {
+                                    val options = Bundle().apply {
+                                        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp)
+                                        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp)
+                                        putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, actualHeightDp)
+                                        putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, actualHeightDp)
+                                    }
+                                    view.updateAppWidgetOptions(options)
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

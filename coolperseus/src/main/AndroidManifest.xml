@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
 
     <application
         android:name="com.dertefter.coolperseus.CoolPerseus"
@@ -13,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CoolPerseus">
         <activity
-            android:name="com.dertefter.coolperseus.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.CoolPerseus">
             <intent-filter>
@@ -22,6 +23,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".widgets.WidgetsActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.TransparentOverlay" />
+
+
     </application>
+
+
 
 </manifest>

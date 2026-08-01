@@ -28,9 +28,9 @@ fun EdgesGlow(
     color: Color = MaterialTheme.colorScheme.primary
 ) {
 
-    val maxV = if (closed) 12f else 30f
+    val maxV = if (closed) 16f else 40f
 
-    val maxAlpha = if (closed) 0.4f else 0.8f
+    val maxAlpha = if (closed) 0.6f else 1.0f
 
     val animatedWidth = when {
         percent < 0.15f -> (percent / 0.15f) * maxV
@@ -60,10 +60,11 @@ fun EdgesGlow(
     ){}
 }
 
-@Preview
+@Preview(backgroundColor = 0xFFF8EFEF)
 @Composable
 fun EdgesGlowPreview() {
-    val infiniteTransition = rememberInfiniteTransition(label = "percent")
+    val infiniteTransition = rememberInfiniteTransition(label = "glowTransition")
+
     val percent by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
@@ -73,7 +74,19 @@ fun EdgesGlowPreview() {
         ),
         label = "percent"
     )
+
+    val closedPhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "closedPhase"
+    )
+    val closed = closedPhase < 1f
+
     MaterialTheme {
-        EdgesGlow(percent = 0.4f, closed = false)
+        EdgesGlow(percent = percent, closed = closed)
     }
 }

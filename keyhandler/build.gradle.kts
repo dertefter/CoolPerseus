@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":coolperseus:shared:design"))
     implementation(project(":coolperseus:shared:data"))
     implementation(project(":coolperseus:feat:overlay"))
 

@@ -112,6 +112,7 @@ fun DeviceAction.toFriendlyString(): String {
             when (action) {
                 "open_front_camera" -> stringResource(R.string.action_open_front_camera)
                 "open_camera" -> stringResource(R.string.action_open_camera)
+                "open_widgets" -> stringResource(R.string.action_open_widgets)
                 Intent.ACTION_VOICE_COMMAND -> stringResource(R.string.action_assist)
                 else -> if (action.isEmpty()) stringResource(R.string.action_custom_intent) else stringResource(R.string.action_intent_prefix, action)
             }

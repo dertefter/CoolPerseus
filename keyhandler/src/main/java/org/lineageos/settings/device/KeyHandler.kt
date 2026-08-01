@@ -1,6 +1,7 @@
 package org.lineageos.settings.device
 
 import android.app.KeyguardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -83,6 +84,9 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
         private const val KEYCODE_SLIDER_UP = 594
         private const val KEYCODE_SLIDER_DOWN = 595
         private const val KEYCODE_AI = 689
+
+        private const val ACTION_SLIDER_EVENT = "com.dertefter.coolperseus.ACTION_SLIDER_EVENT"
+        private const val EXTRA_EVENT_TYPE = "event_type"
     }
 
     override fun handleKeyEvent(event: KeyEvent): KeyEvent? {
@@ -105,6 +109,7 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
 
         handler.post {
             handleAction(type)
+            sendSliderEventBroadcast(type)
         }
 
         return null
@@ -133,6 +138,7 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 when (action.action) {
                     "open_front_camera" -> openCamera(frontCamera = true)
                     "open_camera" -> openCamera(frontCamera = false)
+                    "open_widgets" -> openWidgets()
                     else -> launchCustomIntent(action.action)
                 }
             }
@@ -160,6 +166,45 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
             startActivityAsUser(intent)
         } catch (e: Exception) {
             Log.e("DeviceKeyHandler", "Failed to launch custom intent: $actionString", e)
+        }
+    }
+
+    private fun openWidgets() {
+        try {
+            val intent = Intent().apply {
+                component = ComponentName("com.dertefter.coolperseus", "com.dertefter.coolperseus.widgets.WidgetsActivity")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or 
+                        Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+            }
+            startActivityAsUser(intent)
+        } catch (e: Exception) {
+            Log.e("DeviceKeyHandler", "Failed to launch WidgetsActivity", e)
+        }
+    }
+
+    private fun sendSliderEventBroadcast(type: String) {
+        val intent = Intent(ACTION_SLIDER_EVENT).apply {
+            putExtra(EXTRA_EVENT_TYPE, type)
+            // Ensure the broadcast is explicit for our app if possible, or just send it
+            setPackage("com.dertefter.coolperseus")
+        }
+        sendBroadcastAsUser(intent)
+    }
+
+    private fun sendBroadcastAsUser(intent: Intent) {
+        try {
+            val userHandleClass = Class.forName("android.os.UserHandle")
+            val constructor = userHandleClass.getConstructor(Int::class.javaPrimitiveType)
+            val userHandle = constructor.newInstance(-2) // UserHandle.CURRENT
+            val method = Context::class.java.getMethod("sendBroadcastAsUser", Intent::class.java, userHandleClass)
+            method.invoke(mContext, intent, userHandle)
+        } catch (e: Exception) {
+            Log.e("DeviceKeyHandler", "Failed to sendBroadcastAsUser via reflection", e)
+            try {
+                mContext.sendBroadcast(intent)
+            } catch (e2: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to sendBroadcast normally", e2)
+            }
         }
     }
 

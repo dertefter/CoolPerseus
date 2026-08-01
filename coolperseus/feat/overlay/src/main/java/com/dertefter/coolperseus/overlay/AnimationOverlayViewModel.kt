@@ -12,5 +12,6 @@ class AnimationOverlayViewModel @Inject constructor(
 ) : ViewModel() {
 
     val soundType = settingsRepository.soundType
+    val widgets = settingsRepository.widgets
 
 }
