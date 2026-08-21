@@ -8,7 +8,6 @@
     <string name="action_none">Ничего не делать</string>
     <string name="action_open_front_camera">Открыть фронтальную камеру</string>
     <string name="action_open_camera">Открыть основную камеру</string>
-    <string name="action_open_widgets">Открыть виджеты</string>
     <string name="action_assist">Голосовой помощник</string>
     <string name="action_custom_intent">Кастомный Intent</string>
     <string name="action_intent_prefix">Intent: %1$s</string>

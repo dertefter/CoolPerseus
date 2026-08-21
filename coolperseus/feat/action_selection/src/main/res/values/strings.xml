@@ -7,7 +7,6 @@
     <string name="action_none">Do nothing</string>
     <string name="action_open_front_camera">Open front camera</string>
     <string name="action_open_camera">Open main camera</string>
-    <string name="action_open_widgets">Open widgets</string>
     <string name="action_assist">Voice Assist</string>
     <string name="action_custom_intent">Custom Intent</string>
     <string name="action_intent_prefix">Intent: %1$s</string>

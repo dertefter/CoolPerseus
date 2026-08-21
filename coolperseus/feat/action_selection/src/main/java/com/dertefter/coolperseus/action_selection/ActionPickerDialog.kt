@@ -33,7 +33,6 @@ fun ActionPickerDialog(
         DeviceAction.LaunchIntent(Intent.ACTION_VOICE_COMMAND),
         DeviceAction.LaunchIntent("open_front_camera"),
         DeviceAction.LaunchIntent("open_camera"),
-        DeviceAction.LaunchIntent("open_widgets"),
         DeviceAction.LaunchIntent(""),
         DeviceAction.LaunchApp(""),
     )

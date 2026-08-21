@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
 
     <application
         android:name="com.dertefter.coolperseus.CoolPerseus"
@@ -22,13 +21,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".widgets.WidgetsActivity"
-            android:exported="true"
-            android:excludeFromRecents="true"
-            android:theme="@style/Theme.TransparentOverlay" />
-
 
     </application>
 

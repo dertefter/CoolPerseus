@@ -1,7 +1,6 @@
 package org.lineageos.settings.device
 
 import android.app.KeyguardManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -138,7 +137,6 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 when (action.action) {
                     "open_front_camera" -> openCamera(frontCamera = true)
                     "open_camera" -> openCamera(frontCamera = false)
-                    "open_widgets" -> openWidgets()
                     else -> launchCustomIntent(action.action)
                 }
             }
@@ -166,19 +164,6 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
             startActivityAsUser(intent)
         } catch (e: Exception) {
             Log.e("DeviceKeyHandler", "Failed to launch custom intent: $actionString", e)
-        }
-    }
-
-    private fun openWidgets() {
-        try {
-            val intent = Intent().apply {
-                component = ComponentName("com.dertefter.coolperseus", "com.dertefter.coolperseus.widgets.WidgetsActivity")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or 
-                        Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-            }
-            startActivityAsUser(intent)
-        } catch (e: Exception) {
-            Log.e("DeviceKeyHandler", "Failed to launch WidgetsActivity", e)
         }
     }
 

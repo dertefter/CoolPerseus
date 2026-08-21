@@ -3,24 +3,4 @@
 
     <style name="Theme.CoolPerseus" parent="Theme.Material3.DayNight" />
 
-    <style name="Theme.TransparentOverlay" parent="Theme.Material3.DayNight">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowAnimationStyle">@style/Animation.Widgets</item>
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:windowBlurBehindEnabled">true</item>
-        <item name="android:windowBlurBehindRadius">20dp</item>
-    </style>
-
-    <style name="Animation.Widgets" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenEnterAnimation">@null</item>
-        <item name="android:activityOpenExitAnimation">@null</item>
-        <item name="android:activityCloseEnterAnimation">@null</item>
-        <item name="android:activityCloseExitAnimation">@null</item>
-    </style>
-
-
 </resources>
