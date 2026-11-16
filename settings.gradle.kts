@@ -25,13 +25,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "CoolPerseus"
 
+include(":shared")
+
 include(":keyhandler")
 
 include(":coolperseus")
-
-include(":coolperseus:shared:design")
-include(":coolperseus:shared:data")
-
-include(":coolperseus:feat:overlay")
-include(":coolperseus:feat:sound_selection")
-include(":coolperseus:feat:action_selection")

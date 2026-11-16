@@ -7,9 +7,7 @@ plugins {
 
 android {
     namespace = "com.dertefter.coolperseus"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk { version = release(37) { minorApiLevel = 2 } }
 
     defaultConfig {
         applicationId = "com.dertefter.coolperseus"
@@ -41,12 +39,7 @@ android {
 
 dependencies {
 
-    implementation(project(":coolperseus:shared:design"))
-    implementation(project(":coolperseus:shared:data"))
-
-    implementation(project(":coolperseus:feat:overlay"))
-    implementation(project(":coolperseus:feat:sound_selection"))
-    implementation(project(":coolperseus:feat:action_selection"))
+    implementation(project(":shared"))
 
     implementation(libs.material.kolor)
     implementation(platform(libs.androidx.compose.bom))
@@ -65,10 +58,4 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }

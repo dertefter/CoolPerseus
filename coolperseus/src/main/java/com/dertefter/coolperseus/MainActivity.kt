@@ -22,7 +22,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dertefter.coolperseus.action_selection.ActionSelectionRoute
 import dagger.hilt.android.AndroidEntryPoint
-import com.dertefter.coolperseus.design.theme.CoolPerseusTheme
 import com.dertefter.coolperseus.sound_selection.SoundSelectionRoute
 
 @AndroidEntryPoint

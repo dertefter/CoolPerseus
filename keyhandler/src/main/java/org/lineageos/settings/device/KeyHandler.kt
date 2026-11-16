@@ -4,8 +4,11 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
+import java.io.File
 import android.graphics.PixelFormat
 import android.util.TypedValue
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
@@ -16,17 +19,6 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -36,20 +28,17 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import com.android.internal.os.DeviceKeyHandler
-import com.dertefter.coolperseus.data.SettingsRepository
-import com.dertefter.coolperseus.data.SettingsRepositoryImpl
-import com.dertefter.coolperseus.data.model.DeviceAction
-import com.dertefter.coolperseus.data.model.SoundType
-import com.dertefter.coolperseus.overlay.EdgesGlow
+import com.dertefter.shared.data.SettingsRepository
+import com.dertefter.shared.data.SettingsRepositoryImpl
+import com.dertefter.shared.data.model.DeviceAction
+import com.dertefter.shared.data.model.SoundType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 @Suppress("unused")
 class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
@@ -255,68 +244,39 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.FILL
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                fitInsetsTypes = 0
-            }
+            fitInsetsTypes = 0
             layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
 
-        val overlayView = ComposeView(userContext).apply {
-            setViewTreeLifecycleOwner(this@KeyHandler)
-            setViewTreeViewModelStoreOwner(this@KeyHandler)
-            setViewTreeSavedStateRegistryOwner(this@KeyHandler)
-            
-            setContent {
+        val primaryColorInt = try {
+            val sysUiContext = try { mContext.createPackageContext("com.android.systemui", 0) } catch(e: Exception) { null }
+            val sysUiAccent = sysUiContext?.let {
+                val tv = TypedValue()
+                it.theme.resolveAttribute(android.R.attr.colorAccent, tv, true)
+                if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                    tv.data
+                } else 0
+            } ?: 0
+
+            if (sysUiAccent != 0 && (sysUiAccent and 0xFFFFFF) != 0x1A73E8) {
+                sysUiAccent
+            } else {
                 val isDark = (userContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-                
-                val primaryColor = try {
-                    // SystemUI context is the most reliable source for the actual applied dynamic accent
-                    val sysUiContext = try { mContext.createPackageContext("com.android.systemui", 0) } catch(e: Exception) { null }
-                    val sysUiAccent = sysUiContext?.let {
-                        val tv = TypedValue()
-                        it.theme.resolveAttribute(android.R.attr.colorAccent, tv, true)
-                        if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-                            tv.data
-                        } else 0
-                    } ?: 0
-
-                    if (sysUiAccent != 0 && (sysUiAccent and 0xFFFFFF) != 0x1A73E8) {
-                        Color(sysUiAccent)
-                    } else if (android.os.Build.VERSION.SDK_INT >= 31) {
-                        val finalId = if (isDark) {
-                            userContext.resources.getIdentifier("system_accent1_200", "color", "android")
-                        } else {
-                            userContext.resources.getIdentifier("system_accent1_600", "color", "android")
-                        }
-                        Color(userContext.getColor(finalId))
-                    } else {
-                        Color(0xFF6200EE)
-                    }
-                } catch (e: Exception) {
-                    Log.e("DeviceKeyHandler", "Failed to resolve dynamic color", e)
-                    Color(0xFF6200EE)
+                val finalId = if (isDark) {
+                    userContext.resources.getIdentifier("system_accent1_200", "color", "android")
+                } else {
+                    userContext.resources.getIdentifier("system_accent1_600", "color", "android")
                 }
+                userContext.getColor(finalId)
+            }
+        } catch (e: Exception) {
+            Log.e("DeviceKeyHandler", "Failed to resolve dynamic color", e)
+            "#6200EE".toColorInt()
+        }
 
-                val percent = remember { Animatable(0f) }
-                
-                LaunchedEffect(Unit) {
-                    percent.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(600, easing = LinearEasing)
-                    )
-                    removeOverlay(this@apply)
-                }
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    EdgesGlow(
-                        percent = percent.value,
-                        closed = isOpen,
-                        color = primaryColor
-                    )
-                }
+        val overlayView = EdgesGlow(userContext).apply {
+            startAnimation(isOpen, primaryColorInt) {
+                removeOverlay(this)
             }
         }
 
@@ -333,65 +293,176 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
         }
     }
 
+    private fun getApkPath(): String? {
+        try {
+            val location = KeyHandler::class.java.protectionDomain?.codeSource?.location?.path
+            if (!location.isNullOrEmpty()) {
+                val cleanPath = location.removePrefix("file:").split("!").first()
+                if (File(cleanPath).exists()) {
+                    return cleanPath
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("DeviceKeyHandler", "Failed to get path from CodeSource", e)
+        }
+
+        try {
+            val classLoaderStr = KeyHandler::class.java.classLoader?.toString() ?: ""
+            val regex = Regex("""(/[^"]+\.apk)""")
+            val match = regex.find(classLoaderStr)
+            if (match != null) {
+                val path = match.groupValues[1]
+                if (File(path).exists()) {
+                    return path
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("DeviceKeyHandler", "Failed to get path from ClassLoader string", e)
+        }
+
+        val commonPaths = listOf(
+            "/system/priv-app/DeviceSettings/DeviceSettings.apk",
+            "/system/app/DeviceSettings/DeviceSettings.apk",
+            "/product/priv-app/DeviceSettings/DeviceSettings.apk",
+            "/system_ext/priv-app/DeviceSettings/DeviceSettings.apk"
+        )
+        for (path in commonPaths) {
+            if (File(path).exists()) {
+                return path
+            }
+        }
+
+        return null
+    }
+
+    private fun getTargetResources(): Resources? {
+        // 1. Try mContext.resources first
+        try {
+            val testFd = mContext.resources.openRawResourceFd(R.raw.slide_keji_open)
+            testFd?.close()
+            return mContext.resources
+        } catch (_: Exception) {}
+
+        // 2. Try createPackageContext with common package names
+        val packageNames = listOf(
+            "org.lineageos.settings.device",
+            "com.cyanogenmod.settings.device",
+            "org.lineageos.settings",
+            "com.dertefter.coolperseus"
+        )
+        for (pkg in packageNames) {
+            try {
+                val ctx = mContext.createPackageContext(pkg, 0)
+                val testFd = ctx.resources.openRawResourceFd(R.raw.slide_keji_open)
+                testFd?.close()
+                return ctx.resources
+            } catch (_: Exception) {}
+        }
+
+        // 3. Load resources directly from APK file
+        val apkPath = getApkPath()
+        if (apkPath != null) {
+            try {
+                val pm = mContext.packageManager
+                val appInfo = pm.getPackageArchiveInfo(apkPath, 0)?.applicationInfo
+                if (appInfo != null) {
+                    appInfo.sourceDir = apkPath
+                    appInfo.publicSourceDir = apkPath
+                    val res = pm.getResourcesForApplication(appInfo)
+                    val testFd = res.openRawResourceFd(R.raw.slide_keji_open)
+                    testFd?.close()
+                    Log.d("DeviceKeyHandler", "Successfully loaded Resources from APK path: $apkPath")
+                    return res
+                }
+            } catch (e: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to create Resources from APK path: $apkPath", e)
+            }
+        }
+
+        return null
+    }
+
     private fun playSound(isOpen: Boolean) {
         scope.launch {
             val soundType = settingsRepository.soundType.first() ?: return@launch
-            
-            val resContext = try {
-                mContext.createPackageContext("org.lineageos.settings.device", 0)
-            } catch (e: Exception) {
-                try {
-                    mContext.createPackageContext("com.dertefter.coolperseus", 0)
-                } catch (e2: Exception) {
-                    null
-                }
-            }
 
-            if (resContext == null) return@launch
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
 
-            val resName = if (isOpen) {
-                when (soundType) {
-                    is SoundType.Keji -> "slide_keji_close"
-                    is SoundType.Zippo -> "slide_zippo_close"
-                    is SoundType.Jianghu -> "slide_jianghu_close"
-                    is SoundType.Lingdong -> "slide_lingdong_close"
-                    is SoundType.Jixie -> "slide_jiguan_close"
-                    else -> null
-                }
-            } else {
-                when (soundType) {
-                    is SoundType.Keji -> "slide_keji_open"
-                    is SoundType.Zippo -> "slide_zippo_open"
-                    is SoundType.Jianghu -> "slide_jianghu_open"
-                    is SoundType.Lingdong -> "slide_lingdong_open"
-                    is SoundType.Jixie -> "slide_jiguan_open"
-                    else -> null
-                }
-            }
-
-            val soundResId = if (resName != null) {
-                resContext.resources.getIdentifier(resName, "raw", resContext.packageName)
-            } else 0
-
-            val player = if (soundResId != 0) {
-                MediaPlayer.create(resContext, soundResId)
-            } else if (soundType is SoundType.Custom) {
-                val path = if (isOpen) soundType.closeSoundPath else soundType.openSoundPath
+            if (soundType is SoundType.Custom) {
+                val path = if (isOpen) soundType.openSoundPath else soundType.closeSoundPath
                 if (path.isNotEmpty()) {
                     try {
                         val uri: Uri = path.toUri()
-                        MediaPlayer.create(mContext, uri)
-                    } catch (_: Exception) {
-                        null
+                        val player = MediaPlayer().apply {
+                            setAudioAttributes(audioAttributes)
+                            setDataSource(mContext, uri)
+                            prepare()
+                            setOnCompletionListener { p -> p.release() }
+                            setOnErrorListener { p, what, extra ->
+                                Log.e("DeviceKeyHandler", "MediaPlayer error for custom sound: what=$what, extra=$extra")
+                                p.release()
+                                true
+                            }
+                            start()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("DeviceKeyHandler", "Failed to create MediaPlayer for custom uri $path", e)
                     }
-                } else null
-            } else null
-
-            player?.let {
-                it.start()
-                it.setOnCompletionListener { p ->
-                    p.release()
                 }
+                return@launch
+            }
+
+            val soundResId = if (isOpen) {
+                when (soundType) {
+                    is SoundType.Keji -> R.raw.slide_keji_open
+                    is SoundType.Zippo -> R.raw.slide_zippo_open
+                    is SoundType.Jianghu -> R.raw.slide_jianghu_open
+                    is SoundType.Lingdong -> R.raw.slide_lingdong_open
+                    is SoundType.Jixie -> R.raw.slide_jiguan_open
+                }
+            } else {
+                when (soundType) {
+                    is SoundType.Keji -> R.raw.slide_keji_close
+                    is SoundType.Zippo -> R.raw.slide_zippo_close
+                    is SoundType.Jianghu -> R.raw.slide_jianghu_close
+                    is SoundType.Lingdong -> R.raw.slide_lingdong_close
+                    is SoundType.Jixie -> R.raw.slide_jiguan_close
+                }
+            }
+
+            if (soundResId == 0) return@launch
+
+            val targetResources = getTargetResources()
+            if (targetResources == null) {
+                Log.e("DeviceKeyHandler", "Failed to resolve target Resources for soundResId $soundResId")
+                return@launch
+            }
+
+            try {
+                val afd = targetResources.openRawResourceFd(soundResId)
+                if (afd != null) {
+                    val player = MediaPlayer().apply {
+                        setAudioAttributes(audioAttributes)
+                        setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                        afd.close()
+                        prepare()
+                        setOnCompletionListener { p -> p.release() }
+                        setOnErrorListener { p, what, extra ->
+                            Log.e("DeviceKeyHandler", "MediaPlayer error: what=$what, extra=$extra")
+                            p.release()
+                            true
+                        }
+                        start()
+                    }
+                    Log.d("DeviceKeyHandler", "Successfully started MediaPlayer for soundResId=$soundResId")
+                } else {
+                    Log.e("DeviceKeyHandler", "openRawResourceFd returned null for soundResId $soundResId")
+                }
+            } catch (e: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to play sound for soundResId $soundResId", e)
             }
         }
     }
