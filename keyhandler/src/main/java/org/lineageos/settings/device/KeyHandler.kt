@@ -415,7 +415,7 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 return@launch
             }
 
-            val soundResId = if (isOpen) {
+            val soundResId = if (!isOpen) {
                 when (soundType) {
                     is SoundType.Keji -> R.raw.slide_keji_open
                     is SoundType.Zippo -> R.raw.slide_zippo_open
