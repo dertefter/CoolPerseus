@@ -12,8 +12,8 @@ android {
         applicationId = "org.lineageos.settings.device"
         minSdk = 34
         targetSdk = 37
-        versionCode = 43
-        versionName = "2.2.0 (CoolPerseus)"
+        versionCode = 45
+        versionName = "2.2.1 (CoolPerseus)"
     }
 
     buildTypes {
