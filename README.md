@@ -43,4 +43,4 @@ If you want to build the module yourself, you can use the provided PowerShell sc
 Official sound effects and images used in this project are the property of **Xiaomi Inc.**
 
 ### 💎 Support me:
-https://www.donationalerts.com/r/dertefter
+https://dalink.to/dertefter
