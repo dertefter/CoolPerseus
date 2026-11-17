@@ -33,6 +33,7 @@ import com.dertefter.shared.data.SettingsRepository
 import com.dertefter.shared.data.SettingsRepositoryImpl
 import com.dertefter.shared.data.model.DeviceAction
 import com.dertefter.shared.data.model.SoundType
+import com.dertefter.shared.slider_animations.EdgesGlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -112,10 +113,9 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 else -> DeviceAction.None
             }
             executeAction(action)
-        }
-
-        if (type != "ai_button") {
-            showOverlay(type)
+            if (type != "ai_button") {
+                showOverlay(type)
+            }
         }
     }
 
@@ -214,83 +214,86 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
         }
     }
 
-    private fun showOverlay(type: String) {
+    private suspend fun showOverlay(type: String) {
         if (windowManager == null) {
             windowManager = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         }
 
         val isOpen = type == "slider_up"
-        
-        val userContext = try {
-            val userHandleClass = Class.forName("android.os.UserHandle")
-            val method = Context::class.java.getMethod("createContextAsUser", userHandleClass, Int::class.javaPrimitiveType)
-            val constructor = userHandleClass.getConstructor(Int::class.javaPrimitiveType)
-            val userHandle = constructor.newInstance(-2) // UserHandle.CURRENT
-            method.invoke(mContext, userHandle, 0) as Context
-        } catch (e: Exception) {
-            Log.e("DeviceKeyHandler", "Failed to create user context", e)
-            mContext
-        }
+        val selectedAnim = settingsRepository.selectedAnimation.first()
 
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.FILL
-            fitInsetsTypes = 0
-            layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        }
+        if (selectedAnim != null && selectedAnim != "none") {
+            val userContext = try {
+                val userHandleClass = Class.forName("android.os.UserHandle")
+                val method = Context::class.java.getMethod("createContextAsUser", userHandleClass, Int::class.javaPrimitiveType)
+                val constructor = userHandleClass.getConstructor(Int::class.javaPrimitiveType)
+                val userHandle = constructor.newInstance(-2) // UserHandle.CURRENT
+                method.invoke(mContext, userHandle, 0) as Context
+            } catch (e: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to create user context", e)
+                mContext
+            }
 
-        val primaryColorInt = try {
-            val sysUiContext = try { mContext.createPackageContext("com.android.systemui", 0) } catch(e: Exception) { null }
-            val sysUiAccent = sysUiContext?.let {
-                val tv = TypedValue()
-                it.theme.resolveAttribute(android.R.attr.colorAccent, tv, true)
-                if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-                    tv.data
-                } else 0
-            } ?: 0
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                        WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+                PixelFormat.TRANSLUCENT
+            ).apply {
+                gravity = Gravity.FILL
+                fitInsetsTypes = 0
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
 
-            if (sysUiAccent != 0 && (sysUiAccent and 0xFFFFFF) != 0x1A73E8) {
-                sysUiAccent
-            } else {
-                val isDark = (userContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-                val finalId = if (isDark) {
-                    userContext.resources.getIdentifier("system_accent1_200", "color", "android")
+            val primaryColorInt = try {
+                val sysUiContext = try { mContext.createPackageContext("com.android.systemui", 0) } catch(e: Exception) { null }
+                val sysUiAccent = sysUiContext?.let {
+                    val tv = TypedValue()
+                    it.theme.resolveAttribute(android.R.attr.colorAccent, tv, true)
+                    if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                        tv.data
+                    } else 0
+                } ?: 0
+
+                if (sysUiAccent != 0 && (sysUiAccent and 0xFFFFFF) != 0x1A73E8) {
+                    sysUiAccent
                 } else {
-                    userContext.resources.getIdentifier("system_accent1_600", "color", "android")
+                    val isDark = (userContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+                    val finalId = if (isDark) {
+                        userContext.resources.getIdentifier("system_accent1_200", "color", "android")
+                    } else {
+                        userContext.resources.getIdentifier("system_accent1_600", "color", "android")
+                    }
+                    userContext.getColor(finalId)
                 }
-                userContext.getColor(finalId)
+            } catch (e: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to resolve dynamic color", e)
+                "#6200EE".toColorInt()
             }
-        } catch (e: Exception) {
-            Log.e("DeviceKeyHandler", "Failed to resolve dynamic color", e)
-            "#6200EE".toColorInt()
-        }
 
-        val overlayView = EdgesGlow(userContext).apply {
-            startAnimation(isOpen, primaryColorInt) {
-                removeOverlay(this)
+            val overlayView = EdgesGlow(userContext, zOrderOnTop = true).apply {
+                startAnimation(isOpen, primaryColorInt) {
+                    removeOverlay(this)
+                }
             }
-        }
 
-        try {
-            windowManager?.addView(overlayView, params)
-            if (activeOverlayCount == 0) {
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            try {
+                windowManager?.addView(overlayView, params)
+                if (activeOverlayCount == 0) {
+                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                }
+                activeOverlayCount++
+            } catch (e: Exception) {
+                Log.e("DeviceKeyHandler", "Failed to add overlay view", e)
             }
-            activeOverlayCount++
-            playSound(isOpen)
-        } catch (e: Exception) {
-            Log.e("DeviceKeyHandler", "Failed to add overlay view", e)
         }
+        playSound(isOpen)
     }
 
     private fun getApkPath(): String? {

@@ -43,6 +43,8 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val actionAiButton: Flow<DeviceAction> = createSettingsFlow(PREF_ACTION_AI_BUTTON) { getAction(PREF_ACTION_AI_BUTTON) }
 
+    override val selectedAnimation: Flow<String?> = createSettingsFlow(PREF_SELECTED_ANIMATION) { getSelectedAnimation() }
+
     override suspend fun setSelectedSound(sound: SoundType?) {
         val value = if (sound == null) "none" else serializeSound(sound)
         Settings.System.putString(contentResolver, PREF_SELECTED_SOUND, value)
@@ -78,6 +80,11 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setActionAiButton(action: DeviceAction) {
         Settings.System.putString(contentResolver, PREF_ACTION_AI_BUTTON, action.toStringRepresentation())
+    }
+
+    override suspend fun setSelectedAnimation(animation: String?) {
+        val value = animation ?: "none"
+        Settings.System.putString(contentResolver, PREF_SELECTED_ANIMATION, value)
     }
 
     private fun getAction(key: String): DeviceAction {
@@ -129,11 +136,17 @@ class SettingsRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun getSelectedAnimation(): String? {
+        val value = Settings.System.getString(contentResolver, PREF_SELECTED_ANIMATION) ?: "edges_glow"
+        return if (value == "none") null else value
+    }
+
     companion object {
         private const val PREF_SELECTED_SOUND = "coolperseus_selected_sound"
         private const val PREF_CUSTOM_SOUNDS = "coolperseus_custom_sounds"
         private const val PREF_ACTION_SLIDER_UP = "coolperseus_action_slider_up"
         private const val PREF_ACTION_SLIDER_DOWN = "coolperseus_action_slider_down"
         private const val PREF_ACTION_AI_BUTTON = "coolperseus_action_ai_button"
+        private const val PREF_SELECTED_ANIMATION = "coolperseus_selected_animation"
     }
 }

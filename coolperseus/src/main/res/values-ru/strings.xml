@@ -33,4 +33,8 @@
     <string name="lingdong">Интеллект</string>
     <string name="zippo">Зажигалка</string>
     <string name="no_sound">Без звука</string>
+    <string name="app_animations">Анимации</string>
+    <string name="animation_selection_title">Анимации</string>
+    <string name="edges_glow">Свечение граней</string>
+    <string name="no_animation">Без анимации</string>
 </resources>

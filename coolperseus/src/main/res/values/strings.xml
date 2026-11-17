@@ -32,4 +32,8 @@
     <string name="lingdong">Intellect</string>
     <string name="zippo">Lighter</string>
     <string name="no_sound">Without sound</string>
+    <string name="app_animations">Animations</string>
+    <string name="animation_selection_title">Animations</string>
+    <string name="edges_glow">Edges Glow</string>
+    <string name="no_animation">Without animation</string>
 </resources>

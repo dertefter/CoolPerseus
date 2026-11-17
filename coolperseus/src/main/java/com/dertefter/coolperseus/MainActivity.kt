@@ -21,8 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dertefter.coolperseus.action_selection.ActionSelectionRoute
-import dagger.hilt.android.AndroidEntryPoint
+import com.dertefter.coolperseus.animation_selection.AnimationSelectionRoute
 import com.dertefter.coolperseus.sound_selection.SoundSelectionRoute
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -39,6 +40,11 @@ class MainActivity : ComponentActivity() {
                         label = stringResource(R.string.app_sounds),
                         iconRes = R.drawable.ic_music_note,
                         route = "sounds"
+                    ),
+                    NavigationItem(
+                        label = stringResource(R.string.app_animations),
+                        iconRes = R.drawable.ic_sparkles,
+                        route = "animations"
                     ),
                     NavigationItem(
                         label = stringResource(R.string.app_actions),
@@ -78,6 +84,9 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("sounds") {
                             SoundSelectionRoute()
+                        }
+                        composable("animations") {
+                            AnimationSelectionRoute()
                         }
                         composable("actions") {
                             ActionSelectionRoute()
