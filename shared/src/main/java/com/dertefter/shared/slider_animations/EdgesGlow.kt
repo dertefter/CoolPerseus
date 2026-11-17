@@ -1,4 +1,4 @@
-package org.lineageos.settings.device
+package com.dertefter.shared.slider_animations
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -184,7 +184,8 @@ class EdgesGlowRenderer : GLSurfaceView.Renderer {
 
 class EdgesGlow @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
+    zOrderOnTop: Boolean = false
 ) : GLSurfaceView(context, attrs) {
     private val renderer: EdgesGlowRenderer
     private var percent = 0f
@@ -223,7 +224,9 @@ class EdgesGlow @JvmOverloads constructor(
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
         holder.setFormat(PixelFormat.TRANSLUCENT)
-        setZOrderOnTop(true)
+        if (zOrderOnTop) {
+            setZOrderOnTop(true)
+        }
     }
 
     fun startAnimation(isOpen: Boolean, color: Int, onEnd: () -> Unit) {
