@@ -1,13 +1,11 @@
 package org.lineageos.settings.device
 
+import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.content.res.Resources
-import java.io.File
 import android.graphics.PixelFormat
-import android.util.TypedValue
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -15,10 +13,12 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -34,24 +34,26 @@ import com.dertefter.shared.data.SettingsRepositoryImpl
 import com.dertefter.shared.data.model.DeviceAction
 import com.dertefter.shared.data.model.SoundType
 import com.dertefter.shared.slider_animations.EdgesGlow
+import com.dertefter.shared.slider_animations.PixelGlow
+import com.dertefter.shared.slider_animations.SliderAnimation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import androidx.core.graphics.toColorInt
+import java.io.File
 
 @Suppress("unused")
 class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
 
     private val handler = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    
-    private val lifecycleRegistry = LifecycleRegistry(this)
+
     private val store = ViewModelStore()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
-    override val lifecycle: Lifecycle get() = lifecycleRegistry
+    override val lifecycle: Lifecycle
+        field = LifecycleRegistry(this)
     override val viewModelStore: ViewModelStore get() = store
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
 
@@ -65,7 +67,7 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
     init {
         handler.post {
             savedStateRegistryController.performRestore(null)
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         }
     }
 
@@ -214,13 +216,20 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
         }
     }
 
-    private suspend fun showOverlay(type: String) {
+    @SuppressLint("DiscouragedApi")
+    private fun showOverlay(type: String) {
         if (windowManager == null) {
             windowManager = mContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         }
 
         val isOpen = type == "slider_up"
-        val selectedAnim = settingsRepository.selectedAnimation.first()
+        val selectedAnim = settingsRepository.getSelectedAnimationSync()
+        val glowSettings = settingsRepository.getEdgesGlowSettingsSync()
+        val pixelSettings = settingsRepository.getPixelGlowSettingsSync()
+        Log.d(
+            "DeviceKeyHandler",
+            "showOverlay: type=$type selectedAnim=$selectedAnim edgesGlow=$glowSettings pixelGlow=$pixelSettings"
+        )
 
         if (selectedAnim != null && selectedAnim != "none") {
             val userContext = try {
@@ -250,50 +259,66 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
 
-            val primaryColorInt = try {
-                val sysUiContext = try { mContext.createPackageContext("com.android.systemui", 0) } catch(e: Exception) { null }
-                val sysUiAccent = sysUiContext?.let {
-                    val tv = TypedValue()
-                    it.theme.resolveAttribute(android.R.attr.colorAccent, tv, true)
-                    if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-                        tv.data
-                    } else 0
-                } ?: 0
+            val primaryColorInt = resolveDynamicColor(userContext)
 
-                if (sysUiAccent != 0 && (sysUiAccent and 0xFFFFFF) != 0x1A73E8) {
-                    sysUiAccent
-                } else {
-                    val isDark = (userContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-                    val finalId = if (isDark) {
-                        userContext.resources.getIdentifier("system_accent1_200", "color", "android")
-                    } else {
-                        userContext.resources.getIdentifier("system_accent1_600", "color", "android")
-                    }
-                    userContext.getColor(finalId)
+            val overlayView: View? = when (selectedAnim) {
+                "edges_glow" -> EdgesGlow(userContext, zOrderOnTop = true).apply {
+                    applySettings(glowSettings)
                 }
-            } catch (e: Exception) {
-                Log.e("DeviceKeyHandler", "Failed to resolve dynamic color", e)
-                "#6200EE".toColorInt()
+
+                "pixel_glow" -> PixelGlow(userContext, zOrderOnTop = true).apply {
+                    applySettings(pixelSettings)
+                }
+
+                else -> null
             }
 
-            val overlayView = EdgesGlow(userContext, zOrderOnTop = true).apply {
-                startAnimation(isOpen, primaryColorInt) {
-                    removeOverlay(this)
-                }
+            if (overlayView == null) {
+                Log.w("DeviceKeyHandler", "Unknown animation id: $selectedAnim")
+                playSound(isOpen)
+                return
+            }
+
+            (overlayView as SliderAnimation).startAnimation(isOpen, primaryColorInt) {
+                removeOverlay(overlayView)
             }
 
             try {
                 windowManager?.addView(overlayView, params)
                 if (activeOverlayCount == 0) {
-                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START)
+                    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
                 }
                 activeOverlayCount++
+                Log.d("DeviceKeyHandler", "Overlay added: ${overlayView.javaClass.simpleName}, count=$activeOverlayCount")
             } catch (e: Exception) {
                 Log.e("DeviceKeyHandler", "Failed to add overlay view", e)
             }
+        } else {
+            Log.w(
+                "DeviceKeyHandler",
+                "Overlay skipped: selectedAnim=$selectedAnim (в приложении выбрана анимация «Без анимации»)"
+            )
         }
         playSound(isOpen)
+    }
+
+    private fun resolveDynamicColor(userContext: Context): Int {
+        return try {
+            val sysUiContext = try {
+                mContext.createPackageContext("com.android.systemui", 0)
+            } catch (e: Exception) {
+                null
+            }
+            val tv = TypedValue()
+            val resolveOk = sysUiContext?.theme
+                ?.resolveAttribute(android.R.attr.colorAccent, tv, true) == true
+            val isColorType = tv.type in TypedValue.TYPE_FIRST_COLOR_INT..TypedValue.TYPE_LAST_COLOR_INT
+            val sysUiAccent = if (resolveOk && isColorType) tv.data else 0
+            sysUiAccent
+        } catch (e: Exception) {
+            "#6200EE".toColorInt()
+        }
     }
 
     private fun getApkPath(): String? {
@@ -476,8 +501,8 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 windowManager?.removeView(view)
                 activeOverlayCount--
                 if (activeOverlayCount == 0) {
-                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+                    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
                 }
             } catch (e: Exception) {
                 Log.e("DeviceKeyHandler", "Failed to remove overlay view", e)
