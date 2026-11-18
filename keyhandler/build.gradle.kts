@@ -36,8 +36,16 @@ dependencies {
     implementation(project(":shared"))
 
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.lifecycle.common)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    implementation(libs.androidx.savedstate)
+    implementation(libs.dagger)
+    implementation(libs.hilt.core)
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
 }

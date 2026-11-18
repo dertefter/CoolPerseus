@@ -19,9 +19,11 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-    implementation(libs.hilt.android)
+    api(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    runtimeOnly(libs.androidx.transition)
+    api(libs.dagger)
+    implementation(libs.hilt.core)
+    api(libs.javax.inject)
+    api(libs.kotlinx.coroutines.core)
 }
