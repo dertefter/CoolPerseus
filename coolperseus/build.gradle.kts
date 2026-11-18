@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -13,8 +14,8 @@ android {
         applicationId = "com.dertefter.coolperseus"
         minSdk = 34
         targetSdk = 37
-        versionCode = 46
-        versionName = "2.2.3"
+        versionCode = 47
+        versionName = "2.2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -59,4 +60,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.kotlinx.serialization.core)
 }

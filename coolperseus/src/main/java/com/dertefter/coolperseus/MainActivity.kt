@@ -4,102 +4,66 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.dertefter.coolperseus.action_selection.ActionSelectionRoute
 import com.dertefter.coolperseus.animation_selection.AnimationSelectionRoute
-import com.dertefter.coolperseus.sound_selection.SoundSelectionRoute
+import com.dertefter.coolperseus.home.HomeRoute
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface Screen : NavKey {
+    @Serializable
+    data object Home : Screen
+    @Serializable
+    data object ActionSelection : Screen
+    @Serializable
+    data object AnimationSelection : Screen
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         enableEdgeToEdge()
 
         setContent {
             CoolPerseusTheme {
-                val navController = rememberNavController()
-                val items = listOf(
-                    NavigationItem(
-                        label = stringResource(R.string.app_sounds),
-                        iconRes = R.drawable.ic_music_note,
-                        route = "sounds"
-                    ),
-                    NavigationItem(
-                        label = stringResource(R.string.app_animations),
-                        iconRes = R.drawable.ic_sparkles,
-                        route = "animations"
-                    ),
-                    NavigationItem(
-                        label = stringResource(R.string.app_actions),
-                        iconRes = R.drawable.ic_mobile_hand,
-                        route = "actions"
-                    )
-                )
+                val backStack = rememberNavBackStack(Screen.Home)
 
-                Scaffold(
-                    bottomBar = {
-                        NavigationBar {
-                            val navBackStackEntry by navController.currentBackStackEntryAsState()
-                            val currentDestination = navBackStackEntry?.destination
-                            items.forEach { item ->
-                                NavigationBarItem(
-                                    icon = { Icon(painterResource(item.iconRes), contentDescription = item.label) },
-                                    label = { Text(item.label) },
-                                    selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                                    onClick = {
-                                        navController.navigate(item.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
-                                )
-                            }
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
+                    entryProvider = entryProvider {
+                        entry<Screen.Home> {
+                            HomeRoute(
+                                navigateToActions = { backStack.add(Screen.ActionSelection) },
+                                navigateToAnimations = { backStack.add(Screen.AnimationSelection) }
+                            )
+                        }
+                        entry<Screen.ActionSelection> {
+                            ActionSelectionRoute(
+                                onNavigateBack = { backStack.removeLastOrNull() }
+                            )
+                        }
+                        entry<Screen.AnimationSelection> {
+                            AnimationSelectionRoute(
+                                onNavigateBack = { backStack.removeLastOrNull() }
+                            )
                         }
                     }
-                ) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "sounds",
-                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
-                    ) {
-                        composable("sounds") {
-                            SoundSelectionRoute()
-                        }
-                        composable("animations") {
-                            AnimationSelectionRoute()
-                        }
-                        composable("actions") {
-                            ActionSelectionRoute()
-                        }
-                    }
-                }
+                )
             }
         }
     }
 }
-
-data class NavigationItem(
-    val label: String,
-    val iconRes: Int,
-    val route: String
-)

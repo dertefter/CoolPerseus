@@ -1,4 +1,4 @@
-package com.dertefter.coolperseus.sound_selection
+package com.dertefter.coolperseus.home
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SoundSelectionViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -34,11 +34,11 @@ class SoundSelectionViewModel @Inject constructor(
         null
     )
 
-    val uiState: StateFlow<SoundSelectionUiState> = combine(
+    val uiState: StateFlow<HomeUiState> = combine(
         settingsRepository.soundType,
         MutableStateFlow(availableSounds)
     ) { soundType, sounds ->
-        SoundSelectionUiState(
+        HomeUiState(
             selectedSound = when (soundType) {
                 is SoundType.Keji -> "keji"
                 is SoundType.Jixie -> "jixie"
@@ -52,28 +52,23 @@ class SoundSelectionViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SoundSelectionUiState(null, emptyList())
+        initialValue = HomeUiState(null, emptyList())
     )
 
-    fun onEvent(soundSelectionEvent: SoundSelectionEvent) {
-        when (soundSelectionEvent) {
-            is SoundSelectionEvent.OnSelectSound -> {
-                viewModelScope.launch {
-                    val soundType = when (soundSelectionEvent.sound) {
-                        "keji" -> SoundType.Keji
-                        "jixie" -> SoundType.Jixie
-                        "zippo" -> SoundType.Zippo
-                        "jianghu" -> SoundType.Jianghu
-                        "lingdong" -> SoundType.Lingdong
-                        else -> null
-                    }
-                    settingsRepository.setSelectedSound(soundType)
-                    playSoundPreview(soundSelectionEvent.sound)
-                }
+    fun onEvent(homeEvent: HomeEvent) {
+        if (homeEvent !is HomeEvent.OnSelectSound) return
+
+        viewModelScope.launch {
+            val soundType = when (homeEvent.sound) {
+                "keji" -> SoundType.Keji
+                "jixie" -> SoundType.Jixie
+                "zippo" -> SoundType.Zippo
+                "jianghu" -> SoundType.Jianghu
+                "lingdong" -> SoundType.Lingdong
+                else -> null
             }
-            SoundSelectionEvent.OnNavigateBack -> {
-                // Handled by the activity/navigator
-            }
+            settingsRepository.setSelectedSound(soundType)
+            playSoundPreview(homeEvent.sound)
         }
     }
 
@@ -99,14 +94,12 @@ class SoundSelectionViewModel @Inject constructor(
                         if (mediaPlayer == player) mediaPlayer = null
                     }
                 }
-            } catch (e: Exception) {
-                // Ignore preview errors
-            }
+        } catch (_: Exception) {
+        }
         }
     }
 
     override fun onCleared() {
-        super.onCleared()
         mediaPlayer?.release()
         mediaPlayer = null
     }

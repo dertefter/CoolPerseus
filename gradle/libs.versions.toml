@@ -12,6 +12,8 @@ hiltAndroid = "2.60.1"
 ksp = "2.3.6"
 hiltNavigationCompose = "1.4.0"
 navigationCompose = "2.10.2"
+navigation3 = "1.2.1"
+kotlinxSerialization = "1.13.0"
 materialKolor = "5.0.1"
 
 [libraries]
@@ -35,6 +37,10 @@ androidx-compose-material-icons-core = { group = "androidx.compose.material", na
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -42,4 +48,5 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 

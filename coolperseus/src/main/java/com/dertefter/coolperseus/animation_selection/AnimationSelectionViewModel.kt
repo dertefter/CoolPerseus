@@ -19,16 +19,21 @@ class AnimationSelectionViewModel @Inject constructor(
 
     private val availableAnimations = listOf(
         "edges_glow",
+        "pixel_glow",
         null
     )
 
     val uiState: StateFlow<AnimationSelectionUiState> = combine(
         settingsRepository.selectedAnimation,
+        settingsRepository.edgesGlowSettings,
+        settingsRepository.pixelGlowSettings,
         MutableStateFlow(availableAnimations)
-    ) { selectedAnimation, animations ->
+    ) { selectedAnimation, edgesGlowSettings, pixelGlowSettings, animations ->
         AnimationSelectionUiState(
             selectedAnimation = selectedAnimation,
-            animations = animations
+            animations = animations,
+            edgesGlowSettings = edgesGlowSettings,
+            pixelGlowSettings = pixelGlowSettings
         )
     }.stateIn(
         scope = viewModelScope,
@@ -41,6 +46,26 @@ class AnimationSelectionViewModel @Inject constructor(
             is AnimationSelectionEvent.OnSelectAnimation -> {
                 viewModelScope.launch {
                     settingsRepository.setSelectedAnimation(event.animation)
+                }
+            }
+            is AnimationSelectionEvent.OnUpdateEdgesGlowSettings -> {
+                viewModelScope.launch {
+                    settingsRepository.setEdgesGlowSettings(event.settings)
+                }
+            }
+            AnimationSelectionEvent.OnResetEdgesGlowSettings -> {
+                viewModelScope.launch {
+                    settingsRepository.resetEdgesGlowSettings()
+                }
+            }
+            is AnimationSelectionEvent.OnUpdatePixelGlowSettings -> {
+                viewModelScope.launch {
+                    settingsRepository.setPixelGlowSettings(event.settings)
+                }
+            }
+            AnimationSelectionEvent.OnResetPixelGlowSettings -> {
+                viewModelScope.launch {
+                    settingsRepository.resetPixelGlowSettings()
                 }
             }
             AnimationSelectionEvent.OnNavigateBack -> {

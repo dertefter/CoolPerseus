@@ -88,12 +88,12 @@ fun ActionPickerDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    when {
-                                        action is DeviceAction.LaunchIntent && action.action.isEmpty() -> {
+                                    when (action) {
+                                        is DeviceAction.LaunchIntent if action.action.isEmpty() -> {
                                             showingCustomInput = true
                                         }
 
-                                        action is DeviceAction.LaunchApp && action.packageName.isEmpty() -> {
+                                        is DeviceAction.LaunchApp if action.packageName.isEmpty() -> {
                                             showingAppPicker = true
                                         }
 
