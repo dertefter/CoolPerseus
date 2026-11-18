@@ -14,8 +14,8 @@ android {
         applicationId = "com.dertefter.coolperseus"
         minSdk = 34
         targetSdk = 37
-        versionCode = 47
-        versionName = "2.2.4"
+        versionCode = 48
+        versionName = "2.2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
