@@ -59,4 +59,5 @@
     <string name="pixel_glow_dot_flicker" translatable="false">DOT_FLICKER</string>
 
     <string name="reset_to_default">Reset to default</string>
+    <string name="github_repo">Open on GitHub</string>
 </resources>
