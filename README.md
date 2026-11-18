@@ -9,7 +9,7 @@ Magisk module for the **Xiaomi Mi Mix 3 (Perseus)** running **LineageOS**.
 ### Features
 - **Slider Settings App**: App to control slider settings
 - **Official Sounds**: Restores the original Mi Mix 3 slider sound effects
-- **Edges Glow**: Animation when slider opening or closing
+- **Animations**: Animation when slider opening or closing
 - **Slider Customization**: 
   - Configure specific actions when the slider is opened
   - Configure specific actions when the slider is closed
@@ -37,7 +37,7 @@ If you want to build the module yourself, you can use the provided PowerShell sc
    ```powershell
    ./build_module.ps1
    ```
-4. The flashable Magisk module will be generated in `build/magisk/CoolPerseus_Magisk.zip`.
+4. Magisk module will be generated in `build/magisk/CoolPerseus_Magisk.zip`.
 
 ### Credits
 Official sound effects and images used in this project are the property of **Xiaomi Inc.**
