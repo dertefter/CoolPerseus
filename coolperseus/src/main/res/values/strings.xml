@@ -60,4 +60,5 @@
 
     <string name="reset_to_default">Reset to default</string>
     <string name="github_repo">Open on GitHub</string>
+    <string name="actions_anims">Actions and Animations</string>
 </resources>

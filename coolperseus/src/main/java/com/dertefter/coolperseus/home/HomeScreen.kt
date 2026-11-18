@@ -144,7 +144,7 @@ fun HomeScreen(
                 ) {
 
                     Text(
-                        text = "Действия и анимации",
+                        text = stringResource(R.string.app_actions),
                         style = MaterialTheme.typography.titleMediumEmphasized,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(
