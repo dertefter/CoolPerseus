@@ -1,5 +1,6 @@
 package com.dertefter.coolperseus.animation_selection
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,9 +18,9 @@ fun EdgesGlowSettingsCard(
     modifier: Modifier = Modifier
 ) {
     AnimationSettingsCard(
-        title = stringResource(R.string.edges_glow),
         onReset = onReset,
         modifier = modifier
+            .fillMaxSize()
     ) {
         ShaderSettingSlider(
             title = stringResource(R.string.shader_corner_radius),

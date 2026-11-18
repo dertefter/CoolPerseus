@@ -1,6 +1,7 @@
 package com.dertefter.coolperseus.animation_selection
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -10,11 +11,14 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -23,12 +27,14 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dertefter.coolperseus.CoolPerseusTheme
 import com.dertefter.coolperseus.R
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 
 @Composable
 fun AnimationSelectionScreen(
@@ -38,6 +44,7 @@ fun AnimationSelectionScreen(
 ) {
     val animations = uiState.animations
     val selectedAnimation = uiState.selectedAnimation
+    val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
         initialPage = animations.indexOf(selectedAnimation).coerceAtLeast(0),
         pageCount = { animations.size }
@@ -73,24 +80,56 @@ fun AnimationSelectionScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(text = stringResource(R.string.animation_selection_title))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { onEvent(AnimationSelectionEvent.OnNavigateBack) }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_arrow_back),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
+                Column {
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(text = stringResource(R.string.animation_selection_title))
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { onEvent(AnimationSelectionEvent.OnNavigateBack) }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_back),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    )
+                    if (animations.isNotEmpty()) {
+                        PrimaryScrollableTabRow(
+                            edgePadding = 8.dp,
+                            selectedTabIndex = pagerState.currentPage.coerceIn(animations.indices)
+                        ) {
+                            animations.forEachIndexed { index, animation ->
+                                Tab(
+                                    selected = pagerState.currentPage == index,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    },
+                                    text = {
+                                        Text(
+                                            text = when (animation) {
+                                                "edges_glow" -> stringResource(R.string.edges_glow)
+                                                "pixel_glow" -> stringResource(R.string.pixel_glow)
+                                                null -> stringResource(R.string.no_animation)
+                                                else -> animation
+                                            },
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
-                )
+                }
             }
         ) { innerPadding ->
             HorizontalPager(
                 state = pagerState,
+                userScrollEnabled = false,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -113,11 +152,7 @@ fun AnimationSelectionScreen(
                     )
 
                     else -> AnimationTitlePage(
-                        title = if (animation == null) {
-                            stringResource(R.string.no_animation)
-                        } else {
-                            animation
-                        }
+                        title = animation ?: stringResource(R.string.no_animation)
                     )
                 }
             }
