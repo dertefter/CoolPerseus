@@ -17,7 +17,6 @@ fun PixelGlowSettingsCard(
     modifier: Modifier = Modifier
 ) {
     AnimationSettingsCard(
-        title = stringResource(R.string.pixel_glow),
         onReset = onReset,
         modifier = modifier
     ) {
