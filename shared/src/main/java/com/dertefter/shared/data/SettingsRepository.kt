@@ -34,6 +34,8 @@ interface SettingsRepository {
 
     suspend fun removeCustom(soundType: SoundType)
 
+    suspend fun replaceCustomSounds(sounds: List<SoundType>)
+
     suspend fun setActionSliderUp(action: DeviceAction)
     suspend fun setActionSliderDown(action: DeviceAction)
     suspend fun setActionAiButton(action: DeviceAction)

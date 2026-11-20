@@ -15,6 +15,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -67,11 +68,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun addCustom(soundType: SoundType) {
         val current = getCustomSoundsList().toMutableList()
-        val isDuplicate = current.any {
-            it is SoundType.Custom &&
-                    soundType is SoundType.Custom &&
-                    it.openSoundPath == soundType.openSoundPath
-        }
+        val isDuplicate = current.any { it.isSameSound(soundType) }
         if (!isDuplicate) {
             current.add(soundType)
             saveCustomSounds(current)
@@ -80,10 +77,16 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun removeCustom(soundType: SoundType) {
         val current = getCustomSoundsList().toMutableList()
-        if (current.remove(soundType)) {
+        if (current.removeAll { it.isSameSound(soundType) }) {
             saveCustomSounds(current)
         }
     }
+
+    override suspend fun replaceCustomSounds(sounds: List<SoundType>) {
+        saveCustomSounds(sounds)
+    }
+
+    private fun SoundType.isSameSound(other: SoundType): Boolean = id == other.id
 
     override suspend fun setActionSliderUp(action: DeviceAction) {
         Settings.System.putString(contentResolver, PREF_ACTION_SLIDER_UP, action.toStringRepresentation())
@@ -133,7 +136,7 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     private fun getSelectedSound(): SoundType? {
-        val serialized = Settings.System.getString(contentResolver, PREF_SELECTED_SOUND) ?: return SoundType.Keji
+        val serialized = Settings.System.getString(contentResolver, PREF_SELECTED_SOUND) ?: return null
         return deserializeSound(serialized)
     }
 
@@ -149,33 +152,45 @@ class SettingsRepositoryImpl @Inject constructor(
         contentResolver.notifyChange(Settings.System.getUriFor(PREF_CUSTOM_SOUNDS), null)
     }
 
-    private fun serializeSound(sound: SoundType): String {
-        return when (sound) {
-            is SoundType.Jianghu -> "jianghu"
-            is SoundType.Jixie -> "jixie"
-            is SoundType.Keji -> "keji"
-            is SoundType.Lingdong -> "lingdong"
-            is SoundType.Zippo -> "zippo"
-            is SoundType.Custom -> "custom|${sound.openSoundPath}|${sound.closeSoundPath}"
-        }
-    }
+    private fun serializeSound(sound: SoundType): String = listOf(
+        "custom",
+        sound.id,
+        sound.name,
+        sound.openSounds.joinToString(SOUND_SEPARATOR),
+        sound.closeSounds.joinToString(SOUND_SEPARATOR),
+        sound.imagePath.orEmpty(),
+    ).joinToString("|")
 
     private fun deserializeSound(serialized: String): SoundType? {
-        return when {
-            serialized == "jianghu" -> SoundType.Jianghu
-            serialized == "jixie" -> SoundType.Jixie
-            serialized == "keji" -> SoundType.Keji
-            serialized == "lingdong" -> SoundType.Lingdong
-            serialized == "zippo" -> SoundType.Zippo
-            serialized.startsWith("custom|") -> {
-                val parts = serialized.split("|")
-                if (parts.size == 3) {
-                    SoundType.Custom(parts[1], parts[2])
-                } else null
+        if (!serialized.startsWith("custom|")) return null
+
+        val parts = serialized.split("|")
+        return when (parts.size) {
+            6 -> SoundType(
+                id = parts[1],
+                name = parts[2],
+                openSounds = splitSounds(parts[3]),
+                closeSounds = splitSounds(parts[4]),
+                imagePath = parts[5].ifEmpty { null },
+            ).takeIf { it.isPlayable }
+
+            // формат до появления id и имени: custom|<open>|<close>
+            3 -> {
+                val name = File(parts[1]).parentFile?.name
+                SoundType(
+                    id = name ?: parts[1],
+                    name = name ?: "Sound Pack",
+                    openSounds = splitSounds(parts[1]),
+                    closeSounds = splitSounds(parts[2]),
+                ).takeIf { it.isPlayable }
             }
+
             else -> null
         }
     }
+
+    private fun splitSounds(field: String): List<String> =
+        field.split(SOUND_SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
 
     private fun getSelectedAnimation(): String? {
         val value = Settings.System.getString(contentResolver, PREF_SELECTED_ANIMATION) ?: "edges_glow"
@@ -266,5 +281,6 @@ class SettingsRepositoryImpl @Inject constructor(
         private const val PREF_SELECTED_ANIMATION = "coolperseus_selected_animation"
         private const val PREF_EDGES_GLOW_SETTINGS = "coolperseus_edges_glow_settings"
         private const val PREF_PIXEL_GLOW_SETTINGS = "coolperseus_pixel_glow_settings"
+        private const val SOUND_SEPARATOR = ","
     }
 }
