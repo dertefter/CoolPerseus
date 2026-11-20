@@ -1,10 +1,12 @@
 package com.dertefter.shared.data.model
 
-sealed class SoundType {
-    object Jianghu : SoundType()
-    object Jixie : SoundType()
-    object Keji : SoundType()
-    object Lingdong : SoundType()
-    object Zippo : SoundType()
-    data class Custom(val openSoundPath: String, val closeSoundPath: String) : SoundType()
+data class SoundType(
+    val id: String,
+    val name: String,
+    val openSounds: List<String>,
+    val closeSounds: List<String>,
+    val imagePath: String? = null,
+) {
+    val isPlayable: Boolean
+        get() = openSounds.isNotEmpty() && closeSounds.isNotEmpty()
 }
