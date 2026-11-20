@@ -23,6 +23,13 @@
             </intent-filter>
         </activity>
 
+        <provider
+            android:name="com.dertefter.coolperseus.sounds.SoundPackProvider"
+            android:authorities="com.dertefter.coolperseus.sounds"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            tools:ignore="ExportedContentProvider" />
+
     </application>
 
 
