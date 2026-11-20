@@ -37,19 +37,13 @@
     <string name="edges_glow">Edges Glow</string>
     <string name="pixel_glow">Pixel Glow</string>
     <string name="no_animation">Without animation</string>
-
-    <!-- Общие параметры шейдеров (имена uniform-ов, не переводятся) -->
     <string name="shader_corner_radius" translatable="false">CORNER_RADIUS</string>
     <string name="shader_glow_radius" translatable="false">GLOW_RADIUS</string>
     <string name="shader_glow_power" translatable="false">GLOW_POWER</string>
     <string name="shader_pulse_speed" translatable="false">PULSE_SPEED</string>
     <string name="shader_pulse_amount" translatable="false">PULSE_AMOUNT</string>
-
-    <!-- Edges Glow -->
     <string name="edges_glow_max_vertical_top" translatable="false">maxVerticalTop</string>
     <string name="edges_glow_max_vertical_bottom" translatable="false">maxVerticalBottom</string>
-
-    <!-- Pixel Glow -->
     <string name="pixel_glow_vertical_top" translatable="false">VERTICAL_TOP</string>
     <string name="pixel_glow_vertical_bottom" translatable="false">VERTICAL_BOTTOM</string>
     <string name="pixel_glow_glow_strength" translatable="false">GLOW_STRENGTH</string>
@@ -57,8 +51,10 @@
     <string name="pixel_glow_dot_size" translatable="false">DOT_SIZE</string>
     <string name="pixel_glow_dot_density" translatable="false">DOT_DENSITY</string>
     <string name="pixel_glow_dot_flicker" translatable="false">DOT_FLICKER</string>
-
     <string name="reset_to_default">Reset to default</string>
     <string name="github_repo">Open on GitHub</string>
     <string name="actions_anims">Actions and Animations</string>
+    <string name="add_sound_pack">Add sound pack</string>
+    <string name="error_invalid_sound_pack">Invalid sound pack. Zip archive must contain open sound (_open…), close sound (_close…), and an image (image…)</string>
+    <string name="delete_sound_pack">Delete sound pack</string>
 </resources>

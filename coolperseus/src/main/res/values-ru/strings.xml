@@ -38,28 +38,10 @@
     <string name="edges_glow">Свечение граней</string>
     <string name="pixel_glow">Пиксельное свечение</string>
     <string name="no_animation">Без анимации</string>
-
-    <!-- Общие параметры шейдеров (имена uniform-ов, не переводятся) -->
-
-
-
-
-
-
-    <!-- Edges Glow -->
-
-
-
-    <!-- Pixel Glow -->
-
-
-
-
-
-
-
-
     <string name="reset_to_default">Сбросить по умолчанию</string>
     <string name="github_repo">Открыть на GitHub</string>
     <string name="actions_anims">Действия и анимации</string>
+    <string name="add_sound_pack">Добавить пак</string>
+    <string name="error_invalid_sound_pack">Неверный формат пака. Архив zip должен содержать звук открытия (_open…), звук закрытия (_close…) и картинку (image…)</string>
+    <string name="delete_sound_pack">Удалить пак</string>
 </resources>
