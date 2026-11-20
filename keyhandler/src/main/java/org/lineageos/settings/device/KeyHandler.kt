@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
+import android.content.res.AssetFileDescriptor
 import android.graphics.PixelFormat
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -32,7 +31,6 @@ import com.android.internal.os.DeviceKeyHandler
 import com.dertefter.shared.data.SettingsRepository
 import com.dertefter.shared.data.SettingsRepositoryImpl
 import com.dertefter.shared.data.model.DeviceAction
-import com.dertefter.shared.data.model.SoundType
 import com.dertefter.shared.slider_animations.EdgesGlow
 import com.dertefter.shared.slider_animations.PixelGlow
 import com.dertefter.shared.slider_animations.SliderAnimation
@@ -41,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.File
+import kotlinx.coroutines.withContext
 
 @Suppress("unused")
 class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
@@ -58,7 +56,12 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
 
     private var activeOverlayCount = 0
+    private var currentOverlayView: View? = null
+    private var lastEventTime = 0L
+    private var lastScanCode = -1
     private var windowManager: WindowManager? = null
+    private val openRotator = SoundRotator()
+    private val closeRotator = SoundRotator()
 
     private val settingsRepository: SettingsRepository by lazy {
         SettingsRepositoryImpl(mContext)
@@ -72,12 +75,16 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
     }
 
     companion object {
+        private const val TAG = "DeviceKeyHandler"
+
         private const val KEYCODE_SLIDER_UP = 594
         private const val KEYCODE_SLIDER_DOWN = 595
         private const val KEYCODE_AI = 689
 
         private const val ACTION_SLIDER_EVENT = "com.dertefter.coolperseus.ACTION_SLIDER_EVENT"
         private const val EXTRA_EVENT_TYPE = "event_type"
+
+        private const val CONTENT_SCHEME = "content://"
     }
 
     override fun handleKeyEvent(event: KeyEvent): KeyEvent? {
@@ -89,7 +96,15 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
 
         if (!isMyScancode) return event
 
-        if (event.action != KeyEvent.ACTION_DOWN) return null
+        if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount != 0) return null
+
+        val now = System.currentTimeMillis()
+        if (event.scanCode == lastScanCode && (now - lastEventTime) < 300) {
+            Log.d("DeviceKeyHandler", "Ignoring duplicate key event for scanCode=${event.scanCode}")
+            return null
+        }
+        lastEventTime = now
+        lastScanCode = event.scanCode
 
         val type = when (event.scanCode) {
             KEYCODE_SLIDER_UP -> "slider_up"
@@ -161,7 +176,6 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
     private fun sendSliderEventBroadcast(type: String) {
         val intent = Intent(ACTION_SLIDER_EVENT).apply {
             putExtra(EXTRA_EVENT_TYPE, type)
-            // Ensure the broadcast is explicit for our app if possible, or just send it
             setPackage("com.dertefter.coolperseus")
         }
         sendBroadcastAsUser(intent)
@@ -279,6 +293,11 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
                 return
             }
 
+            currentOverlayView?.let { oldView ->
+                removeOverlay(oldView)
+            }
+            currentOverlayView = overlayView
+
             (overlayView as SliderAnimation).startAnimation(isOpen, primaryColorInt) {
                 removeOverlay(overlayView)
             }
@@ -321,186 +340,89 @@ class KeyHandler(private val mContext: Context) : DeviceKeyHandler, LifecycleOwn
         }
     }
 
-    private fun getApkPath(): String? {
-        try {
-            val location = KeyHandler::class.java.protectionDomain?.codeSource?.location?.path
-            if (!location.isNullOrEmpty()) {
-                val cleanPath = location.removePrefix("file:").split("!").first()
-                if (File(cleanPath).exists()) {
-                    return cleanPath
-                }
-            }
-        } catch (e: Exception) {
-            Log.w("DeviceKeyHandler", "Failed to get path from CodeSource", e)
-        }
-
-        try {
-            val classLoaderStr = KeyHandler::class.java.classLoader?.toString() ?: ""
-            val regex = Regex("""(/[^"]+\.apk)""")
-            val match = regex.find(classLoaderStr)
-            if (match != null) {
-                val path = match.groupValues[1]
-                if (File(path).exists()) {
-                    return path
-                }
-            }
-        } catch (e: Exception) {
-            Log.w("DeviceKeyHandler", "Failed to get path from ClassLoader string", e)
-        }
-
-        val commonPaths = listOf(
-            "/system/priv-app/DeviceSettings/DeviceSettings.apk",
-            "/system/app/DeviceSettings/DeviceSettings.apk",
-            "/product/priv-app/DeviceSettings/DeviceSettings.apk",
-            "/system_ext/priv-app/DeviceSettings/DeviceSettings.apk"
-        )
-        for (path in commonPaths) {
-            if (File(path).exists()) {
-                return path
-            }
-        }
-
-        return null
-    }
-
-    private fun getTargetResources(): Resources? {
-        // 1. Try mContext.resources first
-        try {
-            val testFd = mContext.resources.openRawResourceFd(R.raw.slide_keji_open)
-            testFd?.close()
-            return mContext.resources
-        } catch (_: Exception) {}
-
-        // 2. Try createPackageContext with common package names
-        val packageNames = listOf(
-            "org.lineageos.settings.device",
-            "com.cyanogenmod.settings.device",
-            "org.lineageos.settings",
-            "com.dertefter.coolperseus"
-        )
-        for (pkg in packageNames) {
-            try {
-                val ctx = mContext.createPackageContext(pkg, 0)
-                val testFd = ctx.resources.openRawResourceFd(R.raw.slide_keji_open)
-                testFd?.close()
-                return ctx.resources
-            } catch (_: Exception) {}
-        }
-
-        // 3. Load resources directly from APK file
-        val apkPath = getApkPath()
-        if (apkPath != null) {
-            try {
-                val pm = mContext.packageManager
-                val appInfo = pm.getPackageArchiveInfo(apkPath, 0)?.applicationInfo
-                if (appInfo != null) {
-                    appInfo.sourceDir = apkPath
-                    appInfo.publicSourceDir = apkPath
-                    val res = pm.getResourcesForApplication(appInfo)
-                    val testFd = res.openRawResourceFd(R.raw.slide_keji_open)
-                    testFd?.close()
-                    Log.d("DeviceKeyHandler", "Successfully loaded Resources from APK path: $apkPath")
-                    return res
-                }
-            } catch (e: Exception) {
-                Log.e("DeviceKeyHandler", "Failed to create Resources from APK path: $apkPath", e)
-            }
-        }
-
-        return null
-    }
-
     private fun playSound(isOpen: Boolean) {
         scope.launch {
-            val soundType = settingsRepository.soundType.first() ?: return@launch
+            val sound = settingsRepository.soundType.first() ?: return@launch
+
+            val opening = !isOpen
+            val sounds = if (opening) sound.openSounds else sound.closeSounds
+            val source = (if (opening) openRotator else closeRotator).next(sounds) ?: return@launch
 
             val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
 
-            if (soundType is SoundType.Custom) {
-                val path = if (isOpen) soundType.openSoundPath else soundType.closeSoundPath
-                if (path.isNotEmpty()) {
-                    try {
-                        val uri: Uri = path.toUri()
-                        val player = MediaPlayer().apply {
-                            setAudioAttributes(audioAttributes)
-                            setDataSource(mContext, uri)
-                            prepare()
-                            setOnCompletionListener { p -> p.release() }
-                            setOnErrorListener { p, what, extra ->
-                                Log.e("DeviceKeyHandler", "MediaPlayer error for custom sound: what=$what, extra=$extra")
-                                p.release()
-                                true
-                            }
-                            start()
-                        }
-                    } catch (e: Exception) {
-                        Log.e("DeviceKeyHandler", "Failed to create MediaPlayer for custom uri $path", e)
-                    }
-                }
-                return@launch
-            }
+            withContext(Dispatchers.IO) { playSoundSource(source, audioAttributes) }
+        }
+    }
 
-            val soundResId = if (!isOpen) {
-                when (soundType) {
-                    is SoundType.Keji -> R.raw.slide_keji_open
-                    is SoundType.Zippo -> R.raw.slide_zippo_open
-                    is SoundType.Jianghu -> R.raw.slide_jianghu_open
-                    is SoundType.Lingdong -> R.raw.slide_lingdong_open
-                    is SoundType.Jixie -> R.raw.slide_jiguan_open
+    private class SoundRotator {
+        private var lastIndex = -1
+
+        fun next(sounds: List<String>): String? {
+            if (sounds.isEmpty()) return null
+            if (sounds.size == 1) return sounds.first()
+
+            var index = sounds.indices.random()
+            while (index == lastIndex) {
+                index = sounds.indices.random()
+            }
+            lastIndex = index
+            return sounds[index]
+        }
+    }
+
+    private fun playSoundSource(source: String, audioAttributes: AudioAttributes) {
+        val player = MediaPlayer()
+        try {
+            player.setAudioAttributes(audioAttributes)
+
+            if (source.startsWith(CONTENT_SCHEME)) {
+                val descriptor = openSoundDescriptor(source)
+                if (descriptor == null) {
+                    Log.w(TAG, "Sound pack file is not available: $source")
+                    player.release()
+                    return
+                }
+                descriptor.use {
+                    player.setDataSource(it.fileDescriptor, it.startOffset, it.length)
                 }
             } else {
-                when (soundType) {
-                    is SoundType.Keji -> R.raw.slide_keji_close
-                    is SoundType.Zippo -> R.raw.slide_zippo_close
-                    is SoundType.Jianghu -> R.raw.slide_jianghu_close
-                    is SoundType.Lingdong -> R.raw.slide_lingdong_close
-                    is SoundType.Jixie -> R.raw.slide_jiguan_close
-                }
+                player.setDataSource(source)
             }
 
-            if (soundResId == 0) return@launch
-
-            val targetResources = getTargetResources()
-            if (targetResources == null) {
-                Log.e("DeviceKeyHandler", "Failed to resolve target Resources for soundResId $soundResId")
-                return@launch
+            player.setOnCompletionListener { p -> p.release() }
+            player.setOnErrorListener { p, what, extra ->
+                Log.e(TAG, "MediaPlayer error for $source: what=$what, extra=$extra")
+                p.release()
+                true
             }
-
-            try {
-                val afd = targetResources.openRawResourceFd(soundResId)
-                if (afd != null) {
-                    val player = MediaPlayer().apply {
-                        setAudioAttributes(audioAttributes)
-                        setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                        afd.close()
-                        prepare()
-                        setOnCompletionListener { p -> p.release() }
-                        setOnErrorListener { p, what, extra ->
-                            Log.e("DeviceKeyHandler", "MediaPlayer error: what=$what, extra=$extra")
-                            p.release()
-                            true
-                        }
-                        start()
-                    }
-                    Log.d("DeviceKeyHandler", "Successfully started MediaPlayer for soundResId=$soundResId")
-                } else {
-                    Log.e("DeviceKeyHandler", "openRawResourceFd returned null for soundResId $soundResId")
-                }
-            } catch (e: Exception) {
-                Log.e("DeviceKeyHandler", "Failed to play sound for soundResId $soundResId", e)
-            }
+            player.prepare()
+            player.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play sound $source", e)
+            runCatching { player.release() }
         }
+    }
+
+    private fun openSoundDescriptor(source: String): AssetFileDescriptor? = try {
+        mContext.contentResolver.openAssetFileDescriptor(source.toUri(), "r")
+    } catch (e: Exception) {
+        Log.w(TAG, "SoundPackProvider did not serve $source", e)
+        null
     }
 
     private fun removeOverlay(view: View) {
         handler.post {
             try {
                 windowManager?.removeView(view)
+                if (currentOverlayView == view) {
+                    currentOverlayView = null
+                }
                 activeOverlayCount--
-                if (activeOverlayCount == 0) {
+                if (activeOverlayCount <= 0) {
+                    activeOverlayCount = 0
                     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
                     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
                 }
