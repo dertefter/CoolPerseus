@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.dertefter.coolperseus.data"
+    namespace = "com.dertefter.shared"
     compileSdk { version = release(37) { minorApiLevel = 2 } }
 
     defaultConfig {
