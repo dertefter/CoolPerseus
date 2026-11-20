@@ -109,7 +109,7 @@ class EdgesGlowRenderer : GLSurfaceView.Renderer {
     var onSurfaceReady: (() -> Unit)? = null
 
     var glowColor: Vec3 = Vec3(0f, 1f, 0.384f)
-    var strength: Float = 1.0f
+    var strength: Float = 0.0f
     var verticalTop: Float = 0.05f
     var verticalBottom: Float = 0.4f
 
@@ -394,6 +394,7 @@ class EdgesGlow @JvmOverloads constructor(
         Log.d(TAG, "startAnimation: isOpen=$isOpen color=${Integer.toHexString(colorInt)}")
 
         animator?.cancel()
+        renderer.strength = 0f
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600
             addUpdateListener { anim ->

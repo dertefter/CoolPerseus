@@ -148,11 +148,10 @@ class PixelGlowRenderer : GLSurfaceView.Renderer {
     private var firstFrameLogged = false
     private val startTime = System.currentTimeMillis()
 
-    /** Вызывается на GL-потоке, когда поверхность и программа готовы к отрисовке. */
     var onSurfaceReady: (() -> Unit)? = null
 
     var glowColor: EdgesGlowRenderer.Vec3 = EdgesGlowRenderer.Vec3(0f, 1f, 0.384f)
-    var strength: Float = 1.0f
+    var strength: Float = 0.0f
 
     var glowStrength: Float = PixelGlowSettings.DEFAULT_GLOW_STRENGTH
     var cornerRadius: Float = PixelGlowSettings.DEFAULT_CORNER_RADIUS
@@ -466,6 +465,7 @@ class PixelGlow @JvmOverloads constructor(
         Log.d(TAG, "startAnimation: isOpen=$isOpen color=${Integer.toHexString(colorInt)}")
 
         animator?.cancel()
+        renderer.strength = 0f
         animator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = ANIMATION_DURATION_MS
             addUpdateListener { anim ->
