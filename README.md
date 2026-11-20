@@ -1,4 +1,4 @@
-[![Telegram](art/badges/badge_tg.svg)](https://t.me/+brGMlOT3-jtjZWY6)
+[![Telegram](art/badges/badge_tg.svg)](https://t.me/coolperseus)
 [![Читать на русском](art/badges/badge_ru.svg)](README-RU.md)
 [![Donate](art/badges/badge_dontate_en.svg)](https://dalink.to/dertefter)
 
@@ -27,7 +27,7 @@ Download the latest `CoolPerseus_Magisk.zip` from [Releases](../../releases) and
 
 ## How to Create Your Own Sound Pack
 
-A sound pack is a ZIP archive containing a collection of sounds and a preview image. You can find user-created sound packs [here](https://t.me/+brGMlOT3-jtjZWY6).
+A sound pack is a ZIP archive containing a collection of sounds and a preview image. You can find user-created sound packs [here](https://t.me/coolperseus).
 
 ##### Archive contents:
 

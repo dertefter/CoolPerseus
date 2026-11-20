@@ -1,4 +1,4 @@
-[![Telegram](art/badges/badge_tg.svg)](https://t.me/+brGMlOT3-jtjZWY6)
+[![Telegram](art/badges/badge_tg.svg)](https://t.me/coolperseus)
 [![English](art/badges/badge_en.svg)](README.md)
 [![Задонатить](art/badges/badge_dontate_ru.svg)](https://dalink.to/dertefter) 
 
@@ -29,7 +29,7 @@
 
 ## Как сделать свой пак звуков
 
-Звуковой пак - это архив zip с набором звуков и превью-картинкой. [Тут](https://t.me/+brGMlOT3-jtjZWY6) можно найти наборы звуков, созданные пользователями.
+Звуковой пак - это архив zip с набором звуков и превью-картинкой. [Тут](https://t.me/coolperseus) можно найти наборы звуков, созданные пользователями.
 
 ##### Что должно быть в архиве:
 
