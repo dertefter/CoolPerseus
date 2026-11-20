@@ -45,7 +45,10 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          files: CoolPerseus_Magisk.zip
+          files: |
+            CoolPerseus_Magisk.zip
+            keyhandler/build/outputs/apk/release/keyhandler-release.apk
+            coolperseus/build/outputs/apk/release/coolperseus-release.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
